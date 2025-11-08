@@ -44,12 +44,13 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: var(--gradient-brand);
-  color: white;
+  background: var(--gradient-brand); /* Estilo para modo oscuro */
+  color: white; /* Color de ícono para modo oscuro */
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: var(--transition);
   flex-shrink: 0;
+  border: none; /* Asegura que no haya borde en modo oscuro */
 }
 
 .addButton:hover {
@@ -59,4 +60,27 @@
 
 .addButton:active {
   transform: scale(0.95);
+}
+
+/* FIX: Sobreescribe el botón en modo claro para que sea visible
+  (Usando el "gris" que pediste, similar al fix de Registro.module.css)
+*/
+:global([data-theme="light"]) .addButton {
+  background: var(--bg-secondary); /* Fondo gris claro */
+  border: 1px solid var(--border-color); /* Borde claro */
+  color: var(--text-primary); /* Color de ícono oscuro */
+  box-shadow: var(--shadow);
+}
+
+:global([data-theme="light"]) .addButton:hover {
+  background: var(--bg-card);
+  border-color: var(--brand);
+  box-shadow: var(--shadow-lg);
+}
+
+/* FIX: Asegura que el ícono SVG (Plus) herede 
+  correctamente el 'color' del botón en ambos modos.
+*/
+.addButton svg {
+  stroke: currentColor;
 }
