@@ -16,7 +16,6 @@
   justify-content: flex-end;
 }
 
-
 .container {
   width: 100%;
   max-width: 1080px;
@@ -27,26 +26,48 @@
 
 .intro {
   text-align: center;
-  color: var(--text-secondary);
   max-width: 620px;
   margin: 0 auto;
   display: grid;
   gap: var(--spacing-sm);
 }
 
+/* ✅ CORRECCIÓN: Orden correcto para que el gradiente funcione */
 .intro h1 {
   font-size: clamp(2.25rem, 5vw, 3.25rem);
   margin: 0;
-  background: var(--gradient-brand);
+  font-weight: 700;
+  /* Gradiente de texto */
+  background: linear-gradient(135deg, hsl(204 88% 52%), hsl(268 82% 62%));
   -webkit-background-clip: text;
   background-clip: text;
+  color: transparent;
   -webkit-text-fill-color: transparent;
+}
+
+/* Fallback para navegadores sin soporte de background-clip */
+@supports not (background-clip: text) {
+  .intro h1 {
+    color: var(--text-primary) !important;
+    background: none !important;
+    -webkit-text-fill-color: var(--text-primary) !important;
+  }
+}
+
+/* Asegurar visibilidad en modo claro si la variable falla */
+@media (prefers-color-scheme: light) {
+  .intro h1 {
+    background: linear-gradient(135deg, hsl(204 88% 45%), hsl(268 82% 55%));
+    -webkit-background-clip: text;
+    background-clip: text;
+  }
 }
 
 .intro p {
   font-size: var(--font-size-lg);
   margin: 0;
   line-height: 1.7;
+  color: var(--text-secondary);
 }
 
 .cardsGrid {
@@ -131,6 +152,9 @@
 }
 
 .label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
   font-weight: 600;
   color: var(--text-primary);
 }
@@ -167,17 +191,28 @@
   cursor: pointer;
   border: none;
   transition: var(--transition);
-  color: white;
+  color: var(--btn-text, white);
 }
 
 .buttonPrimary {
-  background: var(--gradient-brand);
+  background: var(--btn-bg-primary, var(--gradient-brand));
   box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.2);
+  border: 1px solid color-mix(in srgb, var(--btn-bg-primary, var(--gradient-brand)) 65%, transparent);
 }
 
 .buttonSecondary {
-  background: linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%));
+  background: var(--btn-bg-secondary, linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%)));
   box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.18);
+  border: 1px solid color-mix(in srgb, var(--btn-bg-secondary, hsl(204 88% 52%)) 55%, transparent);
+}
+
+.buttonPrimary svg,
+.buttonSecondary svg {
+  stroke: currentColor;
+  fill: none;
+  color: inherit;
+  width: 1.15em;
+  height: 1.15em;
 }
 
 .buttonPrimary:hover,
@@ -192,10 +227,12 @@
 
 .buttonPrimary:disabled,
 .buttonSecondary:disabled {
-  opacity: 0.65;
+  opacity: 0.95;
   cursor: not-allowed;
   transform: none;
   box-shadow: none;
+  filter: grayscale(50%) contrast(0.9);
+  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
 }
 
 .buttonPrimary:focus-visible,
@@ -213,37 +250,7 @@
   font-size: var(--font-size-sm);
   font-weight: 600;
   text-align: center;
-  font-weight: 600;
   box-shadow: 0 10px 25px hsla(0, 84%, 58%, 0.15);
-}
-
-.helperText {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  margin: 0;
-}
-
-
-.label {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-xs);
-  font-weight: 500;
-  color: var(--text-primary);
-}
-
-.helperText {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-}
-
-.helperText {
-  color: var(--text-secondary);
-  font-size: var(--font-size-sm);
-  line-height: 1.6;
-  margin: 0;
 }
 
 .helperText {
@@ -354,16 +361,6 @@
   outline-offset: 3px;
 }
 
-.deleteButton:focus-visible {
-  outline: 3px solid hsla(0, 84%, 58%, 0.45);
-  outline-offset: 3px;
-}
-
-.deleteButton:focus-visible {
-  outline: 3px solid hsla(0, 84%, 58%, 0.45);
-  outline-offset: 3px;
-}
-
 .disclaimer {
   margin-top: var(--spacing-lg);
   padding: var(--spacing-md);
@@ -425,305 +422,15 @@
   }
 }
 
-/*
- * Legacy selectors kept for smoother merges with older authentication layouts.
- * They intentionally mirror the current styles so either markup version renders correctly.
- */
-.main {
-  display: contents;
-}
-
-.card h1 {
-  text-align: center;
-  margin-bottom: var(--spacing-sm);
-  background: var(--gradient-brand);
-  -webkit-background-clip: text;
-  background-clip: text;
-  -webkit-text-fill-color: transparent;
-}
-
-.subtitle {
-  text-align: center;
-  color: var(--text-secondary);
-  margin-bottom: clamp(1rem, 3vw, 2rem);
-}
-
-.toggleButton {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 100%;
-  margin-top: clamp(1.5rem, 3vw, 2.5rem);
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: var(--font-size-md);
-  color: var(--text-primary);
-  background: var(--bg-secondary);
-  border: 1px dashed hsla(204, 88%, 52%, 0.35);
-  cursor: pointer;
-  transition: var(--transition);
-}
-
-.toggleButton:hover {
-  background: hsla(204, 88%, 52%, 0.08);
-}
-
-.toggleButton:focus-visible {
-  outline: 3px solid hsla(204, 88%, 52%, 0.35);
-  outline-offset: 3px;
-}
-
-/* ===== Modificaciones para botón y iconos ===== */
-
-/* Botones utilizan variables para responder al tema */
-.buttonPrimary,
-.buttonSecondary {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-md) var(--spacing-xl);
-  border-radius: var(--radius-md);
-  font-weight: 600;
-  font-size: var(--font-size-lg);
-  cursor: pointer;
-  border: none;
-  transition: var(--transition);
-  /* <-- ahora depende de la variable, con fallback a blanco */
-  color: var(--btn-text, white);
-  /* asegurar que iconos hereden color */
-}
-
-/* Preferir variable de fondo (tema). Si no existe, usar gradiente por defecto */
-.buttonPrimary {
-  background: var(--btn-bg-primary, var(--gradient-brand));
-  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.2);
-  border: 1px solid color-mix(in srgb, var(--btn-bg-primary, var(--gradient-brand)) 65%, transparent);
-}
-
-/* Segundo botón también dependiente de variables */
-.buttonSecondary {
-  background: var(--btn-bg-secondary, linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%)));
-  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.18);
-  border: 1px solid color-mix(in srgb, var(--btn-bg-secondary, hsl(204 88% 52%)) 55%, transparent);
-}
-
-/* Fuerza a los SVG / iconos a usar currentColor (lucide-react usa stroke) */
-.buttonPrimary svg,
-.buttonSecondary svg,
-.buttonPrimary > svg,
-.buttonSecondary > svg {
-  stroke: currentColor;
-  fill: none; /* lucide normalmente no usa fill, pero por seguridad */
-  color: inherit;
-  width: 1.15em;
-  height: 1.15em;
-}
-
-/* Hover / focus mantienen buena accesibilidad visual */
-.buttonPrimary:hover,
-.buttonSecondary:hover {
-  transform: translateY(-1px);
-  filter: none;
-}
-
-/* Estado disabled: no bajar tanto la opacidad (evita "desaparecer" en tema claro)
-   y aplicar un pequeño desaturado en vez de hacerlo todo opaco. */
-.buttonPrimary:disabled,
-.buttonSecondary:disabled {
-  opacity: 0.95; /* mantener texto visible */
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-  filter: grayscale(50%) contrast(0.9);
-  /* mantener borde para contraste en temas claros */
-  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
-}
-
-/* Mantener buen enfoque (keyboard) */
-.buttonPrimary:focus-visible,
-.buttonSecondary:focus-visible {
-  outline: 3px solid hsla(204, 88%, 52%, 0.4);
-  outline-offset: 3px;
-}
-
-/* Fallback específico si tu tema aplica una clase .light o data-theme="light"
-   (puedes eliminarlo si tu app usa variables correctamente). */
+/* Tema claro */
 .light .buttonPrimary,
 [data-theme="light"] .buttonPrimary {
-  color: var(--btn-text-on-light, #0b1220); /* texto oscuro sobre fondo claro */
-  /* Si el gradiente queda muy claro en tema light, usar un fondo alternativo */
+  color: var(--btn-text-on-light, #0b1220);
   background: var(--btn-bg-primary-light, linear-gradient(135deg, hsl(220 14% 88%), hsl(200 18% 92%)));
   border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
 }
 
-/* Asegurar legibilidad del icono en fallback de tema claro */
 .light .buttonPrimary svg,
 [data-theme="light"] .buttonPrimary svg {
   stroke: currentColor;
-}
-
-
-/* ===== Arreglo específico para "Guardar y continuar" ===== */
-
-/* Selectores múltiples: adapta a como se llame en tu JSX (.saveContinue, .btn-guardar, etc.) */
-.saveContinue,
-.btn-guardar,
-.btn-guardar-continuar,
-.button-guardar,
-button[data-action="save-continue"],
-form.activity button[type="submit"],
-/* si tu app usa variantes data-variant */
-button[data-variant="primary"][data-action="save-continue"] {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  gap: var(--spacing-sm, 0.5rem);
-  padding: var(--spacing-md, 0.6rem) var(--spacing-lg, 1rem);
-  border-radius: var(--radius-md, 8px);
-  font-weight: 600;
-  font-size: var(--font-size-md, 1rem);
-  cursor: pointer;
-  border: none;
-  transition: var(--transition, 180ms ease);
-  /* Color y fondo dependen de variables (para responder a tema claro/oscuro) */
-  color: var(--btn-text, white); 
-  background: var(--btn-bg-primary, linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%)));
-  box-shadow: 0 12px 24px hsla(204, 88%, 52%, 0.14);
-  border: 1px solid color-mix(in srgb, var(--btn-bg-primary, #0b69ff) 60%, transparent);
-}
-
-/* Forzar que cualquier SVG o icon dentro del botón siga el color del texto */
-.saveContinue svg,
-.btn-guardar svg,
-.btn-guardar-continuar svg,
-.button-guardar svg,
-button[data-action="save-continue"] svg,
-form.activity button[type="submit"] svg {
-  stroke: currentColor !important;
-  fill: none !important;
-  color: inherit !important;
-  width: 1.05em;
-  height: 1.05em;
-}
-
-/* Hover / focus */
-.saveContinue:hover,
-.btn-guardar:hover,
-.btn-guardar-continuar:hover,
-.button-guardar:hover,
-button[data-action="save-continue"]:hover,
-form.activity button[type="submit"]:hover {
-  transform: translateY(-1px);
-  filter: none;
-}
-
-/* Estado disabled: evitar que el botón "desaparezca" en tema claro */
-.saveContinue:disabled,
-.btn-guardar:disabled,
-.btn-guardar-continuar:disabled,
-.button-guardar:disabled,
-button[data-action="save-continue"]:disabled,
-form.activity button[type="submit"]:disabled {
-  opacity: 0.95;
-  cursor: not-allowed;
-  transform: none;
-  box-shadow: none;
-  filter: grayscale(45%) contrast(0.94);
-  border: 1px solid color-mix(in srgb, var(--border-color, #d0d7de) 80%, transparent);
-}
-
-/* Foco accesible */
-.saveContinue:focus-visible,
-.btn-guardar:focus-visible,
-button[data-action="save-continue"]:focus-visible,
-form.activity button[type="submit"]:focus-visible {
-  outline: 3px solid hsla(204, 88%, 52%, 0.32);
-  outline-offset: 3px;
-}
-
-/* Reglas de fallback para tema claro (si tu app usa .light o data-theme) */
-.light .saveContinue,
-[data-theme="light"] .saveContinue,
-.light .btn-guardar,
-[data-theme="light"] .btn-guardar {
-  color: var(--btn-text-on-light, #0b1220); /* texto oscuro en modo claro */
-  background: var(--btn-bg-primary-light, linear-gradient(135deg, hsl(220 14% 88%), hsl(200 18% 92%)));
-  border: 1px solid color-mix(in srgb, var(--border-color, #cfd8e3) 78%, transparent);
-}
-
-/* Asegurar que svg también se vea bien en fallback de tema claro */
-.light .saveContinue svg,
-[data-theme="light"] .saveContinue svg {
-  stroke: currentColor;
-}
-
-/* ===== Arreglo para el botón concreto (clase generada por CSS Modules) ===== */
-._buttonPrimary_6ydwl_73 {
-  display: inline-flex;
-  align-items: center;
-  gap: 0.6rem;
-  padding: 0.55rem 1rem;
-  border-radius: 10px;
-  font-weight: 600;
-  font-size: 1rem;
-  cursor: pointer;
-  border: none;
-  transition: transform 160ms ease, box-shadow 160ms ease;
-  color: var(--btn-text, white); /* texto depende de variable del tema */
-  background: var(--btn-bg-primary, linear-gradient(135deg,#0b69ff,#0066ff));
-  box-shadow: 0 12px 24px rgba(11,105,255,0.18);
-}
-
-/* Asegurar que SVG herede el color (stroke ya es currentColor en tu SVG) */
-._buttonPrimary_6ydwl_73 svg {
-  stroke: currentColor !important;
-  fill: none !important;
-  width: 1.05em;
-  height: 1.05em;
-  color: inherit;
-}
-
-/* Hover / focus */
-._buttonPrimary_6ydwl_73:hover { transform: translateY(-1px); }
-._buttonPrimary_6ydwl_73:focus-visible {
-  outline: 3px solid rgba(11,105,255,0.22);
-  outline-offset: 3px;
-}
-
-/* Estado disabled: no hacerlo totalmente opaco (evita desaparecer en tema claro) */
-._buttonPrimary_6ydwl_73:disabled {
-  opacity: 0.95;
-  cursor: not-allowed;
-  box-shadow: none;
-  filter: grayscale(45%) contrast(0.95);
-  border: 1px solid rgba(0,0,0,0.06);
-}
-
-/* ===== Reglas para modo claro =====
-   Ajusta texto a oscuro y, opcionalmente, cambia el fondo a una variante más contrastada */
-.light ._buttonPrimary_6ydwl_73,
-[data-theme="light"] ._buttonPrimary_6ydwl_73,
-:root[data-theme="light"] ._buttonPrimary_6ydwl_73 {
-  color: var(--btn-text-on-light, #0b1220) !important; /* texto oscuro en light mode */
-  background: var(--btn-bg-primary-light, linear-gradient(135deg, #eef3fb, #f6f8fc));
-  box-shadow: 0 8px 18px rgba(11,12,16,0.06);
-  border: 1px solid rgba(11,18,32,0.06);
-}
-
-/* Asegurar svg también sea visible en light mode */
-.light ._buttonPrimary_6ydwl_73 svg,
-[data-theme="light"] ._buttonPrimary_6ydwl_73 svg,
-:root[data-theme="light"] ._buttonPrimary_6ydwl_73 svg {
-  stroke: currentColor !important;
-}
-
-/* Fallback si usas el modo OS (preferencia del sistema) */
-@media (prefers-color-scheme: light) {
-  ._buttonPrimary_6ydwl_73 {
-    color: var(--btn-text-on-light, #0b1220);
-    background: var(--btn-bg-primary-light, linear-gradient(135deg, #eef3fb, #f6f8fc));
-    box-shadow: 0 8px 18px rgba(11,12,16,0.06);
-  }
 }
