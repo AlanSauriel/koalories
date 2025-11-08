@@ -68,16 +68,33 @@ export default function Dashboard() {
     return intakeEntries.reduce((sum, entry) => sum + (entry.kcalPerUnit * entry.units), 0);
   }, [intakeEntries]);
 
+  const handleUpdateUnits = (id: string, units: number) => {
+    setIntakeEntries(
+      intakeEntries.map(entry =>
+        entry.id === id ? { ...entry, units } : entry
+      )
+    );
+  };
+
   const handleAddFood = (food: FoodItem) => {
-    const newEntry: IntakeEntry = {
-      id: `entry-${Date.now()}`,
-      dateISO: today,
-      foodId: food.id,
-      kcalPerUnit: food.kcalPerServing,
-      units: 1,
-      timestamp: Date.now(),
-    };
-    setIntakeEntries([...intakeEntries, newEntry]);
+    // 1. Buscar si ya existe una entrada para este foodId
+    const existingEntry = intakeEntries.find(entry => entry.foodId === food.id);
+
+    if (existingEntry) {
+      // 2. Si existe, usa la función que ya tienes para actualizar las unidades
+      handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
+    } else {
+      // 3. Si no existe, crea la nueva entrada (como antes)
+      const newEntry: IntakeEntry = {
+        id: `entry-${Date.now()}`,
+        dateISO: today,
+        foodId: food.id,
+        kcalPerUnit: food.kcalPerServing,
+        units: 1,
+        timestamp: Date.now(),
+      };
+      setIntakeEntries([...intakeEntries, newEntry]);
+    }
   };
 
   const handleAddManual = (e: React.FormEvent) => {
@@ -98,14 +115,6 @@ export default function Dashboard() {
     setManualKcal('');
     setManualUnits('1');
     setShowAddManual(false);
-  };
-
-  const handleUpdateUnits = (id: string, units: number) => {
-    setIntakeEntries(
-      intakeEntries.map(entry =>
-        entry.id === id ? { ...entry, units } : entry
-      )
-    );
   };
 
   const handleDeleteEntry = (id: string) => {
