@@ -1,0 +1,54 @@
+.toggle {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-full);
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-color) 90%, transparent);
+  color: var(--text-primary);
+  box-shadow: 0 12px 30px hsla(222, 20%, 12%, 0.12);
+  transition: var(--transition);
+  position: relative;
+  isolation: isolate;
+}
+
+.toggle:hover {
+  transform: scale(1.05);
+  box-shadow: 0 18px 40px hsla(222, 20%, 12%, 0.18);
+}
+
+.toggle:active {
+  transform: scale(0.95);
+}
+
+.toggle:focus-visible {
+  outline: 3px solid color-mix(in srgb, var(--brand) 45%, transparent);
+  outline-offset: 3px;
+}
+
+.toggle[aria-pressed="true"] {
+  background: color-mix(in srgb, var(--brand) 18%, var(--bg-card));
+  color: var(--brand);
+  border-color: color-mix(in srgb, var(--brand) 35%, var(--border-color));
+}
+
+.toggle svg {
+  transition: transform 0.2s ease;
+}
+
+.toggle:hover svg {
+  transform: rotate(-8deg) scale(1.05);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .toggle,
+  .toggle:hover,
+  .toggle:active,
+  .toggle svg,
+  .toggle:hover svg {
+    transition: none;
+    transform: none;
+  }
+}

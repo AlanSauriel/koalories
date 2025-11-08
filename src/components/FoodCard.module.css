@@ -1,0 +1,62 @@
+.card {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: var(--spacing-md);
+  padding: var(--spacing-md);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  transition: var(--transition);
+}
+
+.card:hover {
+  border-color: var(--brand);
+  box-shadow: var(--shadow);
+}
+
+.info {
+  flex: 1;
+}
+
+.name {
+  font-size: var(--font-size-base);
+  font-weight: 600;
+  color: var(--text-primary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.serving {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xs);
+}
+
+.calories {
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  color: var(--brand);
+}
+
+.addButton {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 40px;
+  height: 40px;
+  background: var(--gradient-brand);
+  color: white;
+  border-radius: var(--radius-full);
+  cursor: pointer;
+  transition: var(--transition);
+  flex-shrink: 0;
+}
+
+.addButton:hover {
+  transform: scale(1.1);
+  box-shadow: var(--shadow-lg);
+}
+
+.addButton:active {
+  transform: scale(0.95);
+}

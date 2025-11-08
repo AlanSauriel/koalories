@@ -1,0 +1,51 @@
+import { IntakeEntry, FoodItem } from '../types';
+import { Trash2, Minus, Plus } from 'lucide-react';
+import styles from './IntakeItem.module.css';
+
+interface IntakeItemProps {
+  entry: IntakeEntry;
+  food?: FoodItem;
+  onUpdateUnits: (id: string, units: number) => void;
+  onDelete: (id: string) => void;
+}
+
+export function IntakeItem({ entry, food, onUpdateUnits, onDelete }: IntakeItemProps) {
+  const name = food?.name || entry.customName || 'Alimento personalizado';
+  const totalKcal = entry.kcalPerUnit * entry.units;
+
+  return (
+    <div className={styles.item}>
+      <div className={styles.info}>
+        <h4 className={styles.name}>{name}</h4>
+        <p className={styles.detail}>
+          {entry.kcalPerUnit} kcal × {entry.units} = <strong>{totalKcal} kcal</strong>
+        </p>
+      </div>
+
+      <div className={styles.controls}>
+        <button
+          onClick={() => onUpdateUnits(entry.id, Math.max(1, entry.units - 1))}
+          className={styles.controlButton}
+          aria-label="Disminuir cantidad"
+        >
+          <Minus size={16} />
+        </button>
+        <span className={styles.units}>{entry.units}</span>
+        <button
+          onClick={() => onUpdateUnits(entry.id, entry.units + 1)}
+          className={styles.controlButton}
+          aria-label="Aumentar cantidad"
+        >
+          <Plus size={16} />
+        </button>
+        <button
+          onClick={() => onDelete(entry.id)}
+          className={styles.deleteButton}
+          aria-label="Eliminar"
+        >
+          <Trash2 size={16} />
+        </button>
+      </div>
+    </div>
+  );
+}

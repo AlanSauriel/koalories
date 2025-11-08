@@ -1,0 +1,119 @@
+.page {
+  min-height: 100vh;
+  background: var(--bg-primary);
+  padding: var(--spacing-xl);
+}
+
+.header {
+  max-width: 600px;
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-end;
+  margin-bottom: var(--spacing-md);
+}
+
+.container {
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.card {
+  background: var(--bg-card);
+  border-radius: var(--radius-xl);
+  padding: var(--spacing-2xl);
+  box-shadow: var(--shadow-lg);
+  border: 1px solid var(--border-color);
+}
+
+.card h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: var(--spacing-xl);
+}
+
+.form {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-sm);
+}
+
+.field label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input,
+.select {
+  padding: var(--spacing-md);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-base);
+  background: var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.input:focus,
+.select:focus {
+  outline: none;
+  border-color: var(--brand);
+  box-shadow: 0 0 0 3px hsla(204, 88%, 52%, 0.1);
+}
+
+.buttonPrimary {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  background: var(--gradient-brand);
+  color: white; /* Color original para modo oscuro/degradado */
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  transition: var(--transition);
+  margin-top: var(--spacing-md);
+}
+
+.buttonPrimary:hover {
+  transform: translateY(-2px);
+  box-shadow: var(--shadow-lg);
+}
+
+.buttonPrimary:active {
+  transform: translateY(0);
+}
+
+/* 🚀 FIX: Estilos para Modo Claro (Light Mode) */
+/* Sobreescribe el color del texto y el fondo cuando el tema es "light" para asegurar el contraste */
+:global([data-theme="light"]) .buttonPrimary {
+  /* Forzar el color del texto a ser el principal (oscuro en light mode) */
+  color: var(--text-primary); 
+  /* Usar un fondo claro de contraste con un borde */
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+:global([data-theme="light"]) .buttonPrimary:hover {
+  /* Efecto hover ligero en modo claro */
+  background: var(--bg-card);
+  border-color: var(--brand);
+  box-shadow: var(--shadow-lg);
+}
+
+/* Sobreescribir el color del icono en modo claro para que sea legible */
+:global([data-theme="light"]) .buttonPrimary svg {
+  stroke: var(--text-primary);
+}

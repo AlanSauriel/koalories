@@ -1,0 +1,482 @@
+[
+  {
+    "id": "cereal-1",
+    "name": "Tortilla de maíz",
+    "category": "Cereales sin grasa",
+    "kcalPerServing": 70,
+    "servingName": "1 pieza",
+    "kcalPer100g": 218
+  },
+  {
+    "id": "cereal-2",
+    "name": "Arroz blanco cocido",
+    "category": "Cereales sin grasa",
+    "kcalPerServing": 90,
+    "servingName": "1/3 taza",
+    "kcalPer100g": 130
+  },
+  {
+    "id": "cereal-3",
+    "name": "Pan blanco",
+    "category": "Cereales sin grasa",
+    "kcalPerServing": 70,
+    "servingName": "1 rebanada",
+    "kcalPer100g": 265
+  },
+  {
+    "id": "cereal-4",
+    "name": "Pasta cocida",
+    "category": "Cereales sin grasa",
+    "kcalPerServing": 85,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 131
+  },
+  {
+    "id": "cereal-5",
+    "name": "Avena cruda",
+    "category": "Cereales sin grasa",
+    "kcalPerServing": 75,
+    "servingName": "3 cucharadas",
+    "kcalPer100g": 389
+  },
+  {
+    "id": "cereal-grasa-1",
+    "name": "Pan dulce",
+    "category": "Cereales con grasa",
+    "kcalPerServing": 115,
+    "servingName": "1 pieza pequeña",
+    "kcalPer100g": 411
+  },
+  {
+    "id": "cereal-grasa-2",
+    "name": "Galletas marías",
+    "category": "Cereales con grasa",
+    "kcalPerServing": 105,
+    "servingName": "5 piezas",
+    "kcalPer100g": 440
+  },
+  {
+    "id": "cereal-grasa-3",
+    "name": "Tostadas",
+    "category": "Cereales con grasa",
+    "kcalPerServing": 100,
+    "servingName": "2 piezas",
+    "kcalPer100g": 464
+  },
+  {
+    "id": "verdura-1",
+    "name": "Jitomate",
+    "category": "Verduras",
+    "kcalPerServing": 20,
+    "servingName": "1 pieza mediana",
+    "kcalPer100g": 18
+  },
+  {
+    "id": "verdura-2",
+    "name": "Lechuga",
+    "category": "Verduras",
+    "kcalPerServing": 15,
+    "servingName": "1 taza",
+    "kcalPer100g": 14
+  },
+  {
+    "id": "verdura-3",
+    "name": "Zanahoria",
+    "category": "Verduras",
+    "kcalPerServing": 25,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 41
+  },
+  {
+    "id": "verdura-4",
+    "name": "Brócoli",
+    "category": "Verduras",
+    "kcalPerServing": 20,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 34
+  },
+  {
+    "id": "verdura-5",
+    "name": "Calabaza",
+    "category": "Verduras",
+    "kcalPerServing": 18,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 26
+  },
+  {
+    "id": "verdura-6",
+    "name": "Chayote",
+    "category": "Verduras",
+    "kcalPerServing": 20,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 19
+  },
+  {
+    "id": "verdura-7",
+    "name": "Espinaca",
+    "category": "Verduras",
+    "kcalPerServing": 15,
+    "servingName": "1 taza",
+    "kcalPer100g": 23
+  },
+  {
+    "id": "verdura-8",
+    "name": "Nopales",
+    "category": "Verduras",
+    "kcalPerServing": 18,
+    "servingName": "1 taza",
+    "kcalPer100g": 16
+  },
+  {
+    "id": "fruta-1",
+    "name": "Manzana",
+    "category": "Frutas",
+    "kcalPerServing": 60,
+    "servingName": "1 pieza mediana",
+    "kcalPer100g": 52
+  },
+  {
+    "id": "fruta-2",
+    "name": "Plátano",
+    "category": "Frutas",
+    "kcalPerServing": 90,
+    "servingName": "1/2 pieza",
+    "kcalPer100g": 89
+  },
+  {
+    "id": "fruta-3",
+    "name": "Naranja",
+    "category": "Frutas",
+    "kcalPerServing": 60,
+    "servingName": "1 pieza mediana",
+    "kcalPer100g": 47
+  },
+  {
+    "id": "fruta-4",
+    "name": "Papaya",
+    "category": "Frutas",
+    "kcalPerServing": 55,
+    "servingName": "1 taza",
+    "kcalPer100g": 43
+  },
+  {
+    "id": "fruta-5",
+    "name": "Sandía",
+    "category": "Frutas",
+    "kcalPerServing": 50,
+    "servingName": "1 taza",
+    "kcalPer100g": 30
+  },
+  {
+    "id": "fruta-6",
+    "name": "Mango",
+    "category": "Frutas",
+    "kcalPerServing": 60,
+    "servingName": "1/2 pieza",
+    "kcalPer100g": 60
+  },
+  {
+    "id": "fruta-7",
+    "name": "Fresa",
+    "category": "Frutas",
+    "kcalPerServing": 45,
+    "servingName": "1 taza",
+    "kcalPer100g": 32
+  },
+  {
+    "id": "fruta-8",
+    "name": "Piña",
+    "category": "Frutas",
+    "kcalPerServing": 55,
+    "servingName": "3/4 taza",
+    "kcalPer100g": 50
+  },
+  {
+    "id": "aoa-muy-bajo-1",
+    "name": "Pechuga de pollo sin piel",
+    "category": "AOA muy bajos en grasa",
+    "kcalPerServing": 40,
+    "servingName": "30g",
+    "kcalPer100g": 165
+  },
+  {
+    "id": "aoa-muy-bajo-2",
+    "name": "Pescado blanco",
+    "category": "AOA muy bajos en grasa",
+    "kcalPerServing": 40,
+    "servingName": "30g",
+    "kcalPer100g": 82
+  },
+  {
+    "id": "aoa-muy-bajo-3",
+    "name": "Clara de huevo",
+    "category": "AOA muy bajos en grasa",
+    "kcalPerServing": 17,
+    "servingName": "1 pieza",
+    "kcalPer100g": 52
+  },
+  {
+    "id": "aoa-bajo-1",
+    "name": "Atún en agua",
+    "category": "AOA bajos en grasa",
+    "kcalPerServing": 55,
+    "servingName": "1/4 taza",
+    "kcalPer100g": 116
+  },
+  {
+    "id": "aoa-bajo-2",
+    "name": "Huevo entero",
+    "category": "AOA bajos en grasa",
+    "kcalPerServing": 70,
+    "servingName": "1 pieza",
+    "kcalPer100g": 143
+  },
+  {
+    "id": "aoa-bajo-3",
+    "name": "Requesón",
+    "category": "AOA bajos en grasa",
+    "kcalPerServing": 45,
+    "servingName": "1/4 taza",
+    "kcalPer100g": 98
+  },
+  {
+    "id": "aoa-moderado-1",
+    "name": "Carne molida de res",
+    "category": "AOA moderados en grasa",
+    "kcalPerServing": 75,
+    "servingName": "30g",
+    "kcalPer100g": 250
+  },
+  {
+    "id": "aoa-moderado-2",
+    "name": "Muslo de pollo con piel",
+    "category": "AOA moderados en grasa",
+    "kcalPerServing": 75,
+    "servingName": "30g",
+    "kcalPer100g": 211
+  },
+  {
+    "id": "aoa-moderado-3",
+    "name": "Queso panela",
+    "category": "AOA moderados en grasa",
+    "kcalPerServing": 65,
+    "servingName": "30g",
+    "kcalPer100g": 239
+  },
+  {
+    "id": "aoa-alto-1",
+    "name": "Costilla de cerdo",
+    "category": "AOA altos en grasa",
+    "kcalPerServing": 100,
+    "servingName": "30g",
+    "kcalPer100g": 290
+  },
+  {
+    "id": "aoa-alto-2",
+    "name": "Chorizo",
+    "category": "AOA altos en grasa",
+    "kcalPerServing": 110,
+    "servingName": "30g",
+    "kcalPer100g": 455
+  },
+  {
+    "id": "aoa-alto-3",
+    "name": "Queso manchego",
+    "category": "AOA altos en grasa",
+    "kcalPerServing": 95,
+    "servingName": "30g",
+    "kcalPer100g": 376
+  },
+  {
+    "id": "leche-1",
+    "name": "Leche descremada",
+    "category": "Leche y sustitutos",
+    "kcalPerServing": 95,
+    "servingName": "1 taza",
+    "kcalPer100g": 34
+  },
+  {
+    "id": "leche-2",
+    "name": "Leche entera",
+    "category": "Leche y sustitutos",
+    "kcalPerServing": 150,
+    "servingName": "1 taza",
+    "kcalPer100g": 61
+  },
+  {
+    "id": "leche-3",
+    "name": "Yogurt natural bajo en grasa",
+    "category": "Leche y sustitutos",
+    "kcalPerServing": 110,
+    "servingName": "3/4 taza",
+    "kcalPer100g": 63
+  },
+  {
+    "id": "leche-4",
+    "name": "Leche de almendra",
+    "category": "Leche y sustitutos",
+    "kcalPerServing": 40,
+    "servingName": "1 taza",
+    "kcalPer100g": 17
+  },
+  {
+    "id": "leguminosa-1",
+    "name": "Frijoles cocidos",
+    "category": "Leguminosas",
+    "kcalPerServing": 120,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 127
+  },
+  {
+    "id": "leguminosa-2",
+    "name": "Lentejas cocidas",
+    "category": "Leguminosas",
+    "kcalPerServing": 115,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 116
+  },
+  {
+    "id": "leguminosa-3",
+    "name": "Garbanzos cocidos",
+    "category": "Leguminosas",
+    "kcalPerServing": 120,
+    "servingName": "1/2 taza",
+    "kcalPer100g": 164
+  },
+  {
+    "id": "grasa-mono-1",
+    "name": "Aguacate",
+    "category": "Grasas monoinsaturadas",
+    "kcalPerServing": 45,
+    "servingName": "1/3 pieza",
+    "kcalPer100g": 160
+  },
+  {
+    "id": "grasa-mono-2",
+    "name": "Aceite de oliva",
+    "category": "Grasas monoinsaturadas",
+    "kcalPerServing": 45,
+    "servingName": "1 cucharadita",
+    "kcalPer100g": 884
+  },
+  {
+    "id": "grasa-mono-3",
+    "name": "Almendras",
+    "category": "Grasas monoinsaturadas",
+    "kcalPerServing": 45,
+    "servingName": "7 piezas",
+    "kcalPer100g": 579
+  },
+  {
+    "id": "grasa-mono-4",
+    "name": "Cacahuates",
+    "category": "Grasas monoinsaturadas",
+    "kcalPerServing": 50,
+    "servingName": "10 piezas",
+    "kcalPer100g": 567
+  },
+  {
+    "id": "grasa-poli-1",
+    "name": "Nueces",
+    "category": "Grasas poliinsaturadas",
+    "kcalPerServing": 50,
+    "servingName": "4 mitades",
+    "kcalPer100g": 654
+  },
+  {
+    "id": "grasa-poli-2",
+    "name": "Aceite de girasol",
+    "category": "Grasas poliinsaturadas",
+    "kcalPerServing": 45,
+    "servingName": "1 cucharadita",
+    "kcalPer100g": 884
+  },
+  {
+    "id": "grasa-sat-1",
+    "name": "Mantequilla",
+    "category": "Grasas saturadas y trans",
+    "kcalPerServing": 45,
+    "servingName": "1 cucharadita",
+    "kcalPer100g": 717
+  },
+  {
+    "id": "grasa-sat-2",
+    "name": "Crema",
+    "category": "Grasas saturadas y trans",
+    "kcalPerServing": 40,
+    "servingName": "1 cucharada",
+    "kcalPer100g": 345
+  },
+  {
+    "id": "grasa-sat-3",
+    "name": "Mayonesa",
+    "category": "Grasas saturadas y trans",
+    "kcalPerServing": 50,
+    "servingName": "1 cucharadita",
+    "kcalPer100g": 680
+  },
+  {
+    "id": "azucar-1",
+    "name": "Azúcar",
+    "category": "Azúcares",
+    "kcalPerServing": 40,
+    "servingName": "1 cucharada",
+    "kcalPer100g": 387
+  },
+  {
+    "id": "azucar-2",
+    "name": "Miel",
+    "category": "Azúcares",
+    "kcalPerServing": 60,
+    "servingName": "1 cucharada",
+    "kcalPer100g": 304
+  },
+  {
+    "id": "azucar-3",
+    "name": "Mermelada",
+    "category": "Azúcares",
+    "kcalPerServing": 50,
+    "servingName": "1 cucharada",
+    "kcalPer100g": 278
+  },
+  {
+    "id": "azucar-4",
+    "name": "Refresco",
+    "category": "Azúcares",
+    "kcalPerServing": 140,
+    "servingName": "1 lata",
+    "kcalPer100g": 42
+  },
+  {
+    "id": "libre-1",
+    "name": "Café negro",
+    "category": "Libres de energía",
+    "kcalPerServing": 2,
+    "servingName": "1 taza",
+    "kcalPer100g": 1
+  },
+  {
+    "id": "libre-2",
+    "name": "Té sin azúcar",
+    "category": "Libres de energía",
+    "kcalPerServing": 2,
+    "servingName": "1 taza",
+    "kcalPer100g": 1
+  },
+  {
+    "id": "libre-3",
+    "name": "Agua natural",
+    "category": "Libres de energía",
+    "kcalPerServing": 0,
+    "servingName": "1 vaso",
+    "kcalPer100g": 0
+  },
+  {
+    "id": "libre-4",
+    "name": "Gelatina light",
+    "category": "Libres de energía",
+    "kcalPerServing": 8,
+    "servingName": "1 porción",
+    "kcalPer100g": 8
+  }
+]

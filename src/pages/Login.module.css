@@ -1,0 +1,729 @@
+.page {
+  min-height: 100dvh;
+  display: flex;
+  flex-direction: column;
+  padding: clamp(1.5rem, 4vw, 3.5rem) clamp(1rem, 5vw, 3.5rem);
+  background: linear-gradient(160deg, hsla(204, 88%, 52%, 0.08), hsla(268, 82%, 62%, 0.08)),
+    var(--bg-primary);
+  color: var(--text-primary);
+}
+
+.header {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto var(--spacing-lg);
+  display: flex;
+  justify-content: flex-end;
+}
+
+
+.container {
+  width: 100%;
+  max-width: 1080px;
+  margin: 0 auto;
+  display: grid;
+  gap: clamp(2rem, 5vw, 3rem);
+}
+
+.intro {
+  text-align: center;
+  color: var(--text-secondary);
+  max-width: 620px;
+  margin: 0 auto;
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.intro h1 {
+  font-size: clamp(2.25rem, 5vw, 3.25rem);
+  margin: 0;
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.intro p {
+  font-size: var(--font-size-lg);
+  margin: 0;
+  line-height: 1.7;
+}
+
+.cardsGrid {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr);
+  gap: clamp(1.5rem, 4vw, 2.5rem);
+}
+
+@media (min-width: 960px) {
+  .cardsGrid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .intro {
+    text-align: left;
+    margin: 0;
+  }
+}
+
+.card {
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-xl);
+  padding: clamp(1.75rem, 3vw, 2.5rem);
+  box-shadow: var(--shadow-lg);
+  display: flex;
+  flex-direction: column;
+  gap: clamp(1.25rem, 2vw, 1.75rem);
+}
+
+.loginCard {
+  position: relative;
+  overflow: hidden;
+}
+
+.loginCard::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+  background: radial-gradient(140% 120% at 110% -10%, hsla(204, 88%, 60%, 0.2), transparent 65%);
+  opacity: 0.4;
+}
+
+.loginCard > * {
+  position: relative;
+  z-index: 1;
+}
+
+.registerCard {
+  border: 1px solid hsla(204, 88%, 52%, 0.35);
+  background: linear-gradient(160deg, hsla(204, 88%, 52%, 0.12), hsla(268, 82%, 62%, 0.08)),
+    var(--bg-card);
+}
+
+.cardHeader {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
+.cardHeader h2 {
+  font-size: var(--font-size-2xl);
+  color: var(--text-primary);
+  margin: 0;
+}
+
+.cardHeader p {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.55;
+  margin: 0;
+}
+
+.form {
+  display: grid;
+  gap: var(--spacing-md);
+}
+
+.field {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
+.label {
+  font-weight: 600;
+  color: var(--text-primary);
+}
+
+.input {
+  padding: var(--spacing-md);
+  border: 1px solid color-mix(in srgb, var(--border-color) 85%, transparent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-lg);
+  background: var(--bg-secondary);
+  color: var(--text-primary);
+  transition: var(--transition);
+}
+
+.input::placeholder {
+  color: rgba(130, 142, 160, 0.8);
+}
+
+.input:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.35);
+  border-color: hsla(204, 88%, 52%, 0.6);
+}
+
+.buttonPrimary,
+.buttonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+  color: white;
+}
+
+.buttonPrimary {
+  background: var(--gradient-brand);
+  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.2);
+}
+
+.buttonSecondary {
+  background: linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%));
+  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.18);
+}
+
+.buttonPrimary:hover,
+.buttonSecondary:hover {
+  transform: translateY(-1px);
+}
+
+.buttonPrimary:active,
+.buttonSecondary:active {
+  transform: translateY(0);
+}
+
+.buttonPrimary:disabled,
+.buttonSecondary:disabled {
+  opacity: 0.65;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+}
+
+.buttonPrimary:focus-visible,
+.buttonSecondary:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.4);
+  outline-offset: 3px;
+}
+
+.error {
+  padding: var(--spacing-md);
+  background: hsla(0, 84%, 58%, 0.12);
+  border: 1px solid hsla(0, 84%, 58%, 0.45);
+  border-radius: var(--radius-md);
+  color: var(--danger);
+  font-size: var(--font-size-sm);
+  font-weight: 600;
+  text-align: center;
+  font-weight: 600;
+  box-shadow: 0 10px 25px hsla(0, 84%, 58%, 0.15);
+}
+
+.helperText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0;
+}
+
+
+.label {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-xs);
+  font-weight: 500;
+  color: var(--text-primary);
+}
+
+.helperText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+}
+
+.helperText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.helperText {
+  color: var(--text-secondary);
+  font-size: var(--font-size-sm);
+  line-height: 1.6;
+  margin: 0;
+}
+
+.profilesList {
+  margin-top: auto;
+  padding-top: var(--spacing-lg);
+  border-top: 1px solid var(--border-color);
+  display: grid;
+  gap: var(--spacing-sm);
+  max-height: 260px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: hsla(204, 88%, 52%, 0.35) transparent;
+}
+
+.profilesList h3 {
+  font-size: var(--font-size-lg);
+  font-weight: 600;
+  color: var(--text-secondary);
+}
+
+.profilesList::-webkit-scrollbar {
+  width: 6px;
+}
+
+.profilesList::-webkit-scrollbar-thumb {
+  background: hsla(204, 88%, 52%, 0.35);
+  border-radius: var(--radius-full);
+}
+
+.profileItem {
+  display: flex;
+  gap: var(--spacing-sm);
+  align-items: center;
+}
+
+.profileButton {
+  flex: 1;
+  display: flex;
+  align-items: center;
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--bg-secondary) 94%, transparent);
+  border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
+  border-radius: var(--radius-md);
+  text-align: left;
+  cursor: pointer;
+  transition: var(--transition);
+  min-height: 64px;
+}
+
+.profileButton:hover {
+  border-color: hsla(204, 88%, 52%, 0.35);
+  box-shadow: 0 12px 26px hsla(204, 88%, 52%, 0.16);
+}
+
+.profileButton:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.4);
+  outline-offset: 3px;
+}
+
+.profileButtonActive {
+  background: hsla(204, 88%, 52%, 0.1);
+  border-color: hsla(204, 88%, 52%, 0.45);
+}
+
+.profileInfo {
+  display: grid;
+  gap: var(--spacing-xs);
+}
+
+.profileName {
+  font-weight: 700;
+  color: var(--text-primary);
+}
+
+.profileMeta {
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+}
+
+.deleteButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 44px;
+  height: 44px;
+  border-radius: var(--radius-md);
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--danger);
+  transition: var(--transition);
+}
+
+.deleteButton:hover {
+  background: var(--danger);
+  color: white;
+  box-shadow: 0 12px 26px hsla(0, 84%, 58%, 0.25);
+}
+
+.deleteButton:focus-visible {
+  outline: 3px solid hsla(0, 84%, 58%, 0.45);
+  outline-offset: 3px;
+}
+
+.deleteButton:focus-visible {
+  outline: 3px solid hsla(0, 84%, 58%, 0.45);
+  outline-offset: 3px;
+}
+
+.deleteButton:focus-visible {
+  outline: 3px solid hsla(0, 84%, 58%, 0.45);
+  outline-offset: 3px;
+}
+
+.disclaimer {
+  margin-top: var(--spacing-lg);
+  padding: var(--spacing-md);
+  background: color-mix(in srgb, var(--bg-card) 90%, transparent);
+  border-radius: var(--radius-md);
+  font-size: var(--font-size-sm);
+  color: var(--text-secondary);
+  text-align: center;
+  border: 1px dashed var(--border-color);
+}
+
+@media (max-width: 768px) {
+  .page {
+    padding: var(--spacing-xl) var(--spacing-lg);
+  }
+
+  .header {
+    justify-content: center;
+    margin-bottom: var(--spacing-md);
+  }
+
+  .card {
+    padding: var(--spacing-xl);
+  }
+}
+
+@media (max-width: 540px) {
+  .page {
+    padding: var(--spacing-lg) var(--spacing-md);
+  }
+
+  .profileItem {
+    flex-direction: column;
+    align-items: stretch;
+  }
+
+  .deleteButton {
+    width: 100%;
+    height: auto;
+    padding: var(--spacing-sm);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .card,
+  .buttonPrimary,
+  .buttonSecondary,
+  .profileButton,
+  .deleteButton,
+  .input {
+    transition: none;
+  }
+
+  .buttonPrimary:hover,
+  .buttonSecondary:hover,
+  .profileButton:hover,
+  .deleteButton:hover {
+    transform: none;
+  }
+}
+
+/*
+ * Legacy selectors kept for smoother merges with older authentication layouts.
+ * They intentionally mirror the current styles so either markup version renders correctly.
+ */
+.main {
+  display: contents;
+}
+
+.card h1 {
+  text-align: center;
+  margin-bottom: var(--spacing-sm);
+  background: var(--gradient-brand);
+  -webkit-background-clip: text;
+  background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+.subtitle {
+  text-align: center;
+  color: var(--text-secondary);
+  margin-bottom: clamp(1rem, 3vw, 2rem);
+}
+
+.toggleButton {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 100%;
+  margin-top: clamp(1.5rem, 3vw, 2.5rem);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-md);
+  color: var(--text-primary);
+  background: var(--bg-secondary);
+  border: 1px dashed hsla(204, 88%, 52%, 0.35);
+  cursor: pointer;
+  transition: var(--transition);
+}
+
+.toggleButton:hover {
+  background: hsla(204, 88%, 52%, 0.08);
+}
+
+.toggleButton:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.35);
+  outline-offset: 3px;
+}
+
+/* ===== Modificaciones para botón y iconos ===== */
+
+/* Botones utilizan variables para responder al tema */
+.buttonPrimary,
+.buttonSecondary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm);
+  padding: var(--spacing-md) var(--spacing-xl);
+  border-radius: var(--radius-md);
+  font-weight: 600;
+  font-size: var(--font-size-lg);
+  cursor: pointer;
+  border: none;
+  transition: var(--transition);
+  /* <-- ahora depende de la variable, con fallback a blanco */
+  color: var(--btn-text, white);
+  /* asegurar que iconos hereden color */
+}
+
+/* Preferir variable de fondo (tema). Si no existe, usar gradiente por defecto */
+.buttonPrimary {
+  background: var(--btn-bg-primary, var(--gradient-brand));
+  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.2);
+  border: 1px solid color-mix(in srgb, var(--btn-bg-primary, var(--gradient-brand)) 65%, transparent);
+}
+
+/* Segundo botón también dependiente de variables */
+.buttonSecondary {
+  background: var(--btn-bg-secondary, linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%)));
+  box-shadow: 0 18px 35px hsla(204, 88%, 52%, 0.18);
+  border: 1px solid color-mix(in srgb, var(--btn-bg-secondary, hsl(204 88% 52%)) 55%, transparent);
+}
+
+/* Fuerza a los SVG / iconos a usar currentColor (lucide-react usa stroke) */
+.buttonPrimary svg,
+.buttonSecondary svg,
+.buttonPrimary > svg,
+.buttonSecondary > svg {
+  stroke: currentColor;
+  fill: none; /* lucide normalmente no usa fill, pero por seguridad */
+  color: inherit;
+  width: 1.15em;
+  height: 1.15em;
+}
+
+/* Hover / focus mantienen buena accesibilidad visual */
+.buttonPrimary:hover,
+.buttonSecondary:hover {
+  transform: translateY(-1px);
+  filter: none;
+}
+
+/* Estado disabled: no bajar tanto la opacidad (evita "desaparecer" en tema claro)
+   y aplicar un pequeño desaturado en vez de hacerlo todo opaco. */
+.buttonPrimary:disabled,
+.buttonSecondary:disabled {
+  opacity: 0.95; /* mantener texto visible */
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(50%) contrast(0.9);
+  /* mantener borde para contraste en temas claros */
+  border: 1px solid color-mix(in srgb, var(--border-color) 70%, transparent);
+}
+
+/* Mantener buen enfoque (keyboard) */
+.buttonPrimary:focus-visible,
+.buttonSecondary:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.4);
+  outline-offset: 3px;
+}
+
+/* Fallback específico si tu tema aplica una clase .light o data-theme="light"
+   (puedes eliminarlo si tu app usa variables correctamente). */
+.light .buttonPrimary,
+[data-theme="light"] .buttonPrimary {
+  color: var(--btn-text-on-light, #0b1220); /* texto oscuro sobre fondo claro */
+  /* Si el gradiente queda muy claro en tema light, usar un fondo alternativo */
+  background: var(--btn-bg-primary-light, linear-gradient(135deg, hsl(220 14% 88%), hsl(200 18% 92%)));
+  border: 1px solid color-mix(in srgb, var(--border-color) 80%, transparent);
+}
+
+/* Asegurar legibilidad del icono en fallback de tema claro */
+.light .buttonPrimary svg,
+[data-theme="light"] .buttonPrimary svg {
+  stroke: currentColor;
+}
+
+
+/* ===== Arreglo específico para "Guardar y continuar" ===== */
+
+/* Selectores múltiples: adapta a como se llame en tu JSX (.saveContinue, .btn-guardar, etc.) */
+.saveContinue,
+.btn-guardar,
+.btn-guardar-continuar,
+.button-guardar,
+button[data-action="save-continue"],
+form.activity button[type="submit"],
+/* si tu app usa variantes data-variant */
+button[data-variant="primary"][data-action="save-continue"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--spacing-sm, 0.5rem);
+  padding: var(--spacing-md, 0.6rem) var(--spacing-lg, 1rem);
+  border-radius: var(--radius-md, 8px);
+  font-weight: 600;
+  font-size: var(--font-size-md, 1rem);
+  cursor: pointer;
+  border: none;
+  transition: var(--transition, 180ms ease);
+  /* Color y fondo dependen de variables (para responder a tema claro/oscuro) */
+  color: var(--btn-text, white); 
+  background: var(--btn-bg-primary, linear-gradient(135deg, hsl(204 88% 52%), hsl(195 100% 45%)));
+  box-shadow: 0 12px 24px hsla(204, 88%, 52%, 0.14);
+  border: 1px solid color-mix(in srgb, var(--btn-bg-primary, #0b69ff) 60%, transparent);
+}
+
+/* Forzar que cualquier SVG o icon dentro del botón siga el color del texto */
+.saveContinue svg,
+.btn-guardar svg,
+.btn-guardar-continuar svg,
+.button-guardar svg,
+button[data-action="save-continue"] svg,
+form.activity button[type="submit"] svg {
+  stroke: currentColor !important;
+  fill: none !important;
+  color: inherit !important;
+  width: 1.05em;
+  height: 1.05em;
+}
+
+/* Hover / focus */
+.saveContinue:hover,
+.btn-guardar:hover,
+.btn-guardar-continuar:hover,
+.button-guardar:hover,
+button[data-action="save-continue"]:hover,
+form.activity button[type="submit"]:hover {
+  transform: translateY(-1px);
+  filter: none;
+}
+
+/* Estado disabled: evitar que el botón "desaparezca" en tema claro */
+.saveContinue:disabled,
+.btn-guardar:disabled,
+.btn-guardar-continuar:disabled,
+.button-guardar:disabled,
+button[data-action="save-continue"]:disabled,
+form.activity button[type="submit"]:disabled {
+  opacity: 0.95;
+  cursor: not-allowed;
+  transform: none;
+  box-shadow: none;
+  filter: grayscale(45%) contrast(0.94);
+  border: 1px solid color-mix(in srgb, var(--border-color, #d0d7de) 80%, transparent);
+}
+
+/* Foco accesible */
+.saveContinue:focus-visible,
+.btn-guardar:focus-visible,
+button[data-action="save-continue"]:focus-visible,
+form.activity button[type="submit"]:focus-visible {
+  outline: 3px solid hsla(204, 88%, 52%, 0.32);
+  outline-offset: 3px;
+}
+
+/* Reglas de fallback para tema claro (si tu app usa .light o data-theme) */
+.light .saveContinue,
+[data-theme="light"] .saveContinue,
+.light .btn-guardar,
+[data-theme="light"] .btn-guardar {
+  color: var(--btn-text-on-light, #0b1220); /* texto oscuro en modo claro */
+  background: var(--btn-bg-primary-light, linear-gradient(135deg, hsl(220 14% 88%), hsl(200 18% 92%)));
+  border: 1px solid color-mix(in srgb, var(--border-color, #cfd8e3) 78%, transparent);
+}
+
+/* Asegurar que svg también se vea bien en fallback de tema claro */
+.light .saveContinue svg,
+[data-theme="light"] .saveContinue svg {
+  stroke: currentColor;
+}
+
+/* ===== Arreglo para el botón concreto (clase generada por CSS Modules) ===== */
+._buttonPrimary_6ydwl_73 {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.6rem;
+  padding: 0.55rem 1rem;
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 1rem;
+  cursor: pointer;
+  border: none;
+  transition: transform 160ms ease, box-shadow 160ms ease;
+  color: var(--btn-text, white); /* texto depende de variable del tema */
+  background: var(--btn-bg-primary, linear-gradient(135deg,#0b69ff,#0066ff));
+  box-shadow: 0 12px 24px rgba(11,105,255,0.18);
+}
+
+/* Asegurar que SVG herede el color (stroke ya es currentColor en tu SVG) */
+._buttonPrimary_6ydwl_73 svg {
+  stroke: currentColor !important;
+  fill: none !important;
+  width: 1.05em;
+  height: 1.05em;
+  color: inherit;
+}
+
+/* Hover / focus */
+._buttonPrimary_6ydwl_73:hover { transform: translateY(-1px); }
+._buttonPrimary_6ydwl_73:focus-visible {
+  outline: 3px solid rgba(11,105,255,0.22);
+  outline-offset: 3px;
+}
+
+/* Estado disabled: no hacerlo totalmente opaco (evita desaparecer en tema claro) */
+._buttonPrimary_6ydwl_73:disabled {
+  opacity: 0.95;
+  cursor: not-allowed;
+  box-shadow: none;
+  filter: grayscale(45%) contrast(0.95);
+  border: 1px solid rgba(0,0,0,0.06);
+}
+
+/* ===== Reglas para modo claro =====
+   Ajusta texto a oscuro y, opcionalmente, cambia el fondo a una variante más contrastada */
+.light ._buttonPrimary_6ydwl_73,
+[data-theme="light"] ._buttonPrimary_6ydwl_73,
+:root[data-theme="light"] ._buttonPrimary_6ydwl_73 {
+  color: var(--btn-text-on-light, #0b1220) !important; /* texto oscuro en light mode */
+  background: var(--btn-bg-primary-light, linear-gradient(135deg, #eef3fb, #f6f8fc));
+  box-shadow: 0 8px 18px rgba(11,12,16,0.06);
+  border: 1px solid rgba(11,18,32,0.06);
+}
+
+/* Asegurar svg también sea visible en light mode */
+.light ._buttonPrimary_6ydwl_73 svg,
+[data-theme="light"] ._buttonPrimary_6ydwl_73 svg,
+:root[data-theme="light"] ._buttonPrimary_6ydwl_73 svg {
+  stroke: currentColor !important;
+}
+
+/* Fallback si usas el modo OS (preferencia del sistema) */
+@media (prefers-color-scheme: light) {
+  ._buttonPrimary_6ydwl_73 {
+    color: var(--btn-text-on-light, #0b1220);
+    background: var(--btn-bg-primary-light, linear-gradient(135deg, #eef3fb, #f6f8fc));
+    box-shadow: 0 8px 18px rgba(11,12,16,0.06);
+  }
+}
