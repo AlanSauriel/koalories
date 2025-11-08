@@ -126,8 +126,8 @@ export default function Login() {
 
       <div className={styles.container}>
         <div className={styles.intro}>
-          <h1>Contador de Calorías</h1>
-          <p>Organiza tu alimentación diaria y mantén tus metas siempre visibles.</p>
+          <img src="/images/kalories.png" alt="Kalories" className={styles.logo} />
+          <p>Construye tu bienestar bocado a bocado y que tus metas iluminen tu camino.</p>
         </div>
 
         <div className={styles.cardsGrid}>
