@@ -19,6 +19,18 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "../components/ui/dialog"; 
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // --- IMPORTADO ---
+import { useToast } from "@/hooks/use-toast"; // --- IMPORTADO ---
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -31,6 +43,7 @@ const GOAL_ADJUSTMENTS: Record<Goal, number> = {
 export default function Dashboard() {
   const navigate = useNavigate();
   const { activeProfile, logout, updateActiveProfile } = useSession(); 
+  const { toast } = useToast(); // --- INICIALIZADO ---
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
@@ -55,14 +68,12 @@ export default function Dashboard() {
     }
   }, [activeProfile, navigate]);
 
-  // --- CORRECCIÓN AQUÍ ---
-  // Se eliminó el guion bajo (_) después de ()
   useEffect(() => {
     setFoodsCache(foodsData);
   }, [setFoodsCache]);
-  // --- FIN CORRECIÓN ---
 
   const filteredFoods = useMemo(() => {
+    // ... (lógica de filtrado igual)
     const combinedFoods = [...foodsData, ...customFoods];
     let filtered = combinedFoods;
     
@@ -96,6 +107,7 @@ export default function Dashboard() {
   }, [activeProfile]);
 
   const { motivationalPhrase, remainingText } = useMemo(() => {
+    // ... (lógica de frases igual)
     if (!activeProfile) {
       return { 
         motivationalPhrase: "Inicia sesión para empezar.",
@@ -160,6 +172,7 @@ export default function Dashboard() {
   };
 
   const handleAddFood = (food: FoodItem) => {
+    // ... (lógica de añadir comida igual)
     const existingEntry = intakeEntries.find(entry => entry.foodId === food.id);
     if (existingEntry) {
       handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
@@ -177,6 +190,7 @@ export default function Dashboard() {
   };
 
   const handleAddManual = (e: React.FormEvent) => {
+    // ... (lógica de añadir manual igual)
     e.preventDefault();
     if (!manualName.trim() || !manualKcal) return;
 
@@ -223,7 +237,7 @@ export default function Dashboard() {
     setManualKcal('');
     setManualUnits('1');
     setSaveToMyFoods(false);
-    setShowAddManual(false); // Cierra el diálogo
+    setShowAddManual(false);
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -231,12 +245,12 @@ export default function Dashboard() {
   };
 
   const handleReset = () => {
-    if (confirm('¿Seguro que deseas reiniciar el día?')) {
-      setIntakeEntries([]);
-    }
+    // --- CAMBIO: La confirmación se movió al JSX (AlertDialog) ---
+    setIntakeEntries([]);
   };
 
   const handleLogout = () => {
+    // Podríamos cambiar esto a un AlertDialog también, pero por ahora lo dejamos
     if (confirm('¿Deseas cambiar de perfil?')) {
       logout();
       navigate('/login');
@@ -246,7 +260,12 @@ export default function Dashboard() {
   const handleGoalChange = (newGoal: Goal) => {
     if (!activeProfile) return;
     if (activeProfile.tdee === 0) {
-      alert("Primero necesitas calcular tus datos en la página de registro.");
+      // --- CAMBIO: De alert() a toast() ---
+      toast({
+        title: "Meta no calculada",
+        description: "Primero necesitas calcular tus datos en la página de registro.",
+        variant: "destructive",
+      });
       navigate('/registro');
       return;
     }
@@ -254,6 +273,7 @@ export default function Dashboard() {
   };
 
   const handleExport = async () => {
+    // ... (lógica de exportar igual)
     if (!activeProfile) return;
     try {
       await exportToPDF({
@@ -265,7 +285,11 @@ export default function Dashboard() {
       });
     } catch (error) {
       console.error('Error exporting PDF:', error);
-      alert('Error al exportar el PDF. Por favor intenta de nuevo.');
+      toast({
+        title: "Error al exportar",
+        description: "Hubo un problema al generar el PDF. Por favor intenta de nuevo.",
+        variant: "destructive"
+      });
     }
   };
 
@@ -274,6 +298,7 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
+        {/* ... (header JSX igual) ... */}
         <div className={styles.headerContent}>
           <div>
             <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
@@ -313,6 +338,7 @@ export default function Dashboard() {
                     <DialogTitle>Añadir alimento manual</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAddManual} className={styles.manualForm}>
+                    {/* ... (formulario añadir manual JSX igual) ... */}
                     <div className={styles.manualFormGrid}>
                       <input
                         type="text"
@@ -383,6 +409,7 @@ export default function Dashboard() {
           <div className={styles.sidebarContent}>
             
             <section className={styles.goalSection}>
+              {/* ... (sección de metas JSX igual) ... */}
               <h3 className={styles.goalTitle}>🎯 Tu Objetivo</h3>
               <div className={styles.goalOptions}>
                 <button
@@ -413,6 +440,7 @@ export default function Dashboard() {
             </section>
             
             <section className={styles.progressSection}>
+              {/* ... (sección de progreso JSX igual) ... */}
               <ProgressRing 
                 consumed={totalConsumed} 
                 goal={targetKcal} 
@@ -420,7 +448,6 @@ export default function Dashboard() {
               <div className={styles.progressText}>
                 <p className={styles.remainingText}>{remainingText}</p>
                 <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
-
               </div>
             </section>
 
@@ -434,9 +461,29 @@ export default function Dashboard() {
                     <Download size={18} />
                   </button>
                   {intakeEntries.length > 0 && (
-                    <button onClick={handleReset} className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
-                      <RotateCcw size={18} />
-                    </button>
+                    // --- CAMBIO: AlertDialog para reiniciar día ---
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
+                          <RotateCcw size={18} />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Reiniciar el día?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará todos los alimentos que has registrado hoy.
+                            No se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleReset} className={styles.buttonDanger}>
+                            Sí, reiniciar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
                   )}
                 </div>
               </div>
