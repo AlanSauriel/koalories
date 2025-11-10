@@ -9,15 +9,21 @@ import { IntakeItem } from '../components/IntakeItem';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { ExportPanel } from '../components/ExportPanel';
-import { FoodItem, IntakeEntry } from '../types';
+import { FoodItem, IntakeEntry, Goal } from '../types'; 
 import { getCurrentDateISO } from '../utils/date';
 import { LogOut, Plus, RotateCcw, BarChart3 } from 'lucide-react';
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
+const GOAL_ADJUSTMENTS: Record<Goal, number> = {
+  deficit: -500,
+  maintenance: 0,
+  surplus: 300,
+};
+
 export default function Dashboard() {
   const navigate = useNavigate();
-  const { activeProfile, logout } = useSession();
+  const { activeProfile, logout, updateActiveProfile } = useSession(); 
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
@@ -25,20 +31,23 @@ export default function Dashboard() {
   const [manualName, setManualName] = useState('');
   const [manualKcal, setManualKcal] = useState('');
   const [manualUnits, setManualUnits] = useState('1');
+  
+  // --- NUEVO ESTADO PARA "MIS ALIMENTOS" ---
+  const [saveToMyFoods, setSaveToMyFoods] = useState(false);
 
   const today = getCurrentDateISO();
   const intakeKey = activeProfile ? `cc_intake_${activeProfile.id}_${today}` : '';
+  const customFoodsKey = activeProfile ? `cc_customFoods_${activeProfile.id}` : '';
   
   const [intakeEntries, setIntakeEntries] = useLocalStorage<IntakeEntry[]>(intakeKey, []);
+  // --- NUEVO LOCALSTORAGE PARA "MIS ALIMENTOS" ---
+  const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>(customFoodsKey, []);
   const [, setFoodsCache] = useLocalStorage<FoodItem[]>('cc_foodsCache', foodsData);
 
   useEffect(() => {
     if (!activeProfile) {
       navigate('/login');
       return;
-    }
-    if (activeProfile.tdee === 0) {
-      navigate('/registro');
     }
   }, [activeProfile, navigate]);
 
@@ -47,11 +56,18 @@ export default function Dashboard() {
     setFoodsCache(foodsData);
   }, [setFoodsCache]);
 
+  // --- `filteredFoods` AHORA USA `customFoods` ---
   const filteredFoods = useMemo(() => {
-    let filtered = foodsData as FoodItem[];
+    const combinedFoods = [...foodsData, ...customFoods];
+    
+    let filtered = combinedFoods;
     
     if (selectedCategory !== 'Todas') {
-      filtered = filtered.filter(f => f.category === selectedCategory);
+      if (selectedCategory === 'Mis Alimentos') {
+        filtered = customFoods;
+      } else {
+        filtered = filtered.filter(f => f.category === selectedCategory);
+      }
     }
     
     if (searchQuery.trim()) {
@@ -61,27 +77,41 @@ export default function Dashboard() {
       );
     }
     
-    return filtered;
-  }, [searchQuery, selectedCategory]);
+    return filtered.sort((a, b) => a.name.localeCompare(b.name)); // Ordenamos alfabéticamente
+  }, [searchQuery, selectedCategory, customFoods]); // Añadimos customFoods como dependencia
 
   const totalConsumed = useMemo(() => {
     return intakeEntries.reduce((sum, entry) => sum + (entry.kcalPerUnit * entry.units), 0);
   }, [intakeEntries]);
 
-  // --- LÓGICA DE FRASES DINÁMICAS CORREGIDA ---
+  const targetKcal = useMemo(() => {
+    if (!activeProfile) return 0;
+    if (activeProfile.tdee === 0) return 0;
+    
+    const adjustment = GOAL_ADJUSTMENTS[activeProfile.goal || 'maintenance'];
+    return Math.round(activeProfile.tdee + adjustment);
+  }, [activeProfile]);
+
   const { motivationalPhrase, remainingText } = useMemo(() => {
-    if (!activeProfile || activeProfile.tdee === 0) {
+    if (!activeProfile) {
       return { 
-        motivationalPhrase: "Define tu meta para empezar.",
+        motivationalPhrase: "Inicia sesión para empezar.",
         remainingText: "" 
       };
     }
+    
+    const goal = targetKcal;
 
-    const goal = Math.round(activeProfile.tdee);
+    if (goal === 0) {
+      return {
+        motivationalPhrase: "Ve a 'Mis Datos' para calcular tu meta.",
+        remainingText: "Meta no calculada"
+      };
+    }
+
     const consumed = Math.round(totalConsumed);
     const remaining = goal - consumed;
     const caloriesOver = consumed - goal;
-    // Usamos el porcentaje exacto para la lógica
     const percentage = goal > 0 ? (consumed / goal) * 100 : 0; 
 
     let phrase = "";
@@ -102,19 +132,12 @@ export default function Dashboard() {
     } else if (percentage < 90) {
       phrase = "Estás muy cerca, ¡no te detengas!";
       remText = `Te faltan ${remaining} kcal`;
-    
-    // --- CAMBIOS AQUÍ ---
-    // (90% a 99.9...%)
     } else if (percentage < 100) { 
-      phrase = "Ya casi llegas, ¡sigue así!"; // Tu frase solicitada
+      phrase = "Ya casi llegas, ¡sigue así!";
       remText = `Te faltan ${remaining} kcal`;
-    
-    // (Exactamente 100%)
     } else if (percentage === 100) { 
       phrase = "¡Felicidades! ¡Meta alcanzada!";
       remText = "¡Justo en la meta!";
-    
-    // (Más de 100%)
     } else { 
       remText = `Te has pasado por ${caloriesOver} kcal`;
       if (caloriesOver > 50) {
@@ -123,15 +146,12 @@ export default function Dashboard() {
         phrase = "Meta superada. Un día no define tu progreso. ¡Ánimo!";
       }
     }
-    // --- FIN DE CAMBIOS ---
 
     return { 
       motivationalPhrase: phrase, 
       remainingText: remText
     };
-
-  }, [totalConsumed, activeProfile]);
-  // --- FIN DE LA LÓGICA ---
+  }, [totalConsumed, activeProfile, targetKcal]);
 
   const handleUpdateUnits = (id: string, units: number) => {
     setIntakeEntries(
@@ -159,23 +179,64 @@ export default function Dashboard() {
     }
   };
 
+  // --- `handleAddManual` ACTUALIZADO ---
   const handleAddManual = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualName.trim() || !manualKcal) return;
 
-    const newEntry: IntakeEntry = {
-      id: `entry-${Date.now()}`,
-      dateISO: today,
-      customName: manualName.trim(),
-      kcalPerUnit: Number(manualKcal),
-      units: Number(manualUnits),
-      timestamp: Date.now(),
-    };
+    const units = Number(manualUnits) || 1;
+    const kcal = Number(manualKcal);
+    const name = manualName.trim();
+
+    // Si el usuario quiere guardar, creamos un FoodItem
+    if (saveToMyFoods) {
+      const newFoodItem: FoodItem = {
+        id: `custom-${Date.now()}`,
+        name: name,
+        category: 'Mis Alimentos',
+        kcalPerServing: kcal,
+        servingName: '1 unidad', // Los alimentos manuales se guardan como "unidad"
+        isCustom: true,
+      };
+      // 1. Guardamos el nuevo FoodItem en "Mis Alimentos"
+      setCustomFoods(prev => [...prev, newFoodItem]);
+      
+      // 2. Añadimos el item al consumo usando la lógica existente
+      // Si el usuario puso más de 1 unidad, la respetamos
+      if (units > 1) {
+        // Creamos la entrada base...
+        const newEntry: IntakeEntry = {
+          id: `entry-${Date.now()}`,
+          dateISO: today,
+          foodId: newFoodItem.id,
+          kcalPerUnit: newFoodItem.kcalPerServing,
+          units: units, // ...con las unidades especificadas
+          timestamp: Date.now(),
+        };
+        setIntakeEntries([...intakeEntries, newEntry]);
+      } else {
+        // Si solo es 1 unidad, la función handleAddFood lo hace por nosotros
+        handleAddFood(newFoodItem);
+      }
+
+    } else {
+      // Lógica anterior: solo añade una entrada de consumo, no la guarda
+      const newEntry: IntakeEntry = {
+        id: `entry-${Date.now()}`,
+        dateISO: today,
+        customName: name, // Se guarda como 'customName'
+        kcalPerUnit: kcal,
+        units: units,
+        timestamp: Date.now(),
+      };
+      setIntakeEntries([...intakeEntries, newEntry]);
+    }
     
-    setIntakeEntries([...intakeEntries, newEntry]);
+    // Reseteamos el formulario
     setManualName('');
     setManualKcal('');
     setManualUnits('1');
+    setSaveToMyFoods(false); // Reseteamos el checkbox
     setShowAddManual(false);
   };
 
@@ -196,6 +257,19 @@ export default function Dashboard() {
     }
   };
 
+  const handleGoalChange = (newGoal: Goal) => {
+    if (!activeProfile) return;
+    
+    if (activeProfile.tdee === 0) {
+      alert("Primero necesitas calcular tus datos en la página de registro.");
+      navigate('/registro');
+      return;
+    }
+    
+    updateActiveProfile({ goal: newGoal });
+  };
+
+
   if (!activeProfile) return null;
 
   return (
@@ -204,11 +278,14 @@ export default function Dashboard() {
         <div className={styles.headerContent}>
           <div>
             <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
-            <p className={styles.subtitle}>Tu meta: {Math.round(activeProfile.tdee)} kcal/día</p>
+            <p className={styles.subtitle}>Tu meta: {targetKcal} kcal/día</p>
           </div>
           <div className={styles.headerActions}>
             <Link to="/historial" className={styles.iconButton} aria-label="Ver historial">
               <BarChart3 size={20} />
+            </Link>
+            <Link to="/registro" className={styles.iconButton} aria-label="Editar mis datos">
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21v-2a4 4 0 0 0-4-4H9a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
             </Link>
             <ThemeToggle />
             <button onClick={handleLogout} className={styles.iconButton} aria-label="Cambiar perfil">
@@ -244,10 +321,40 @@ export default function Dashboard() {
         <aside className={styles.sidebar}>
           <div className={styles.sidebarContent}>
             
+            <section className={styles.goalSection}>
+              <h3 className={styles.goalTitle}>🎯 Tu Objetivo</h3>
+              <div className={styles.goalOptions}>
+                <button
+                  className={`${styles.goalButton} ${activeProfile.goal === 'deficit' ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('deficit')}
+                  aria-pressed={activeProfile.goal === 'deficit'}
+                >
+                  Perder Peso
+                  <span>(Déficit ~500 kcal)</span>
+                </button>
+                <button
+                  className={`${styles.goalButton} ${(!activeProfile.goal || activeProfile.goal === 'maintenance') ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('maintenance')}
+                  aria-pressed={!activeProfile.goal || activeProfile.goal === 'maintenance'}
+                >
+                  Mantener
+                  <span>(TDEE)</span>
+                </button>
+                <button
+                  className={`${styles.goalButton} ${activeProfile.goal === 'surplus' ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('surplus')}
+                  aria-pressed={activeProfile.goal === 'surplus'}
+                >
+                  Ganar Peso
+                  <span>(Superávit ~300 kcal)</span>
+                </button>
+              </div>
+            </section>
+            
             <section className={styles.progressSection}>
               <ProgressRing 
                 consumed={totalConsumed} 
-                goal={activeProfile.tdee} 
+                goal={targetKcal} 
               />
               <div className={styles.progressText}>
                 <p className={styles.remainingText}>{remainingText}</p>
@@ -309,6 +416,21 @@ export default function Dashboard() {
                       className={styles.input}
                       required
                     />
+                    
+                    {/* --- CHECKBOX AÑADIDO --- */}
+                    <div className={styles.saveFoodCheckbox}>
+                      <input 
+                        type="checkbox"
+                        id="saveToMyFoods"
+                        checked={saveToMyFoods}
+                        onChange={(e) => setSaveToMyFoods(e.target.checked)}
+                      />
+                      <label htmlFor="saveToMyFoods">
+                        Guardar en "Mis Alimentos"
+                      </label>
+                    </div>
+                    {/* --- FIN DEL CHECKBOX --- */}
+
                     <button type="submit" className={styles.buttonPrimary}>
                       Agregar
                     </button>
@@ -323,7 +445,11 @@ export default function Dashboard() {
               ) : (
                 <div className={styles.intakeList}>
                   {intakeEntries.map(entry => {
-                    const food = entry.foodId ? foodsData.find(f => f.id === entry.foodId) : undefined;
+                    // --- LÓGICA DE BÚSQUEDA ACTUALIZADA ---
+                    // Ahora busca en ambos, `foodsData` y `customFoods`
+                    const food = entry.foodId 
+                      ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
+                      : undefined;
                     return (
                       <IntakeItem
                         key={entry.id}
