@@ -8,10 +8,17 @@ import { FoodCard } from '../components/FoodCard';
 import { IntakeItem } from '../components/IntakeItem';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
-import { ExportPanel } from '../components/ExportPanel';
 import { FoodItem, IntakeEntry, Goal } from '../types'; 
 import { getCurrentDateISO } from '../utils/date';
-import { LogOut, Plus, RotateCcw, BarChart3 } from 'lucide-react';
+import { LogOut, Plus, RotateCcw, BarChart3, Download } from 'lucide-react';
+import { exportToPDF } from '../utils/pdf'; 
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog"; 
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -27,12 +34,10 @@ export default function Dashboard() {
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
-  const [showAddManual, setShowAddManual] = useState(false);
+  const [showAddManual, setShowAddManual] = useState(false); 
   const [manualName, setManualName] = useState('');
   const [manualKcal, setManualKcal] = useState('');
   const [manualUnits, setManualUnits] = useState('1');
-  
-  // --- NUEVO ESTADO PARA "MIS ALIMENTOS" ---
   const [saveToMyFoods, setSaveToMyFoods] = useState(false);
 
   const today = getCurrentDateISO();
@@ -40,7 +45,6 @@ export default function Dashboard() {
   const customFoodsKey = activeProfile ? `cc_customFoods_${activeProfile.id}` : '';
   
   const [intakeEntries, setIntakeEntries] = useLocalStorage<IntakeEntry[]>(intakeKey, []);
-  // --- NUEVO LOCALSTORAGE PARA "MIS ALIMENTOS" ---
   const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>(customFoodsKey, []);
   const [, setFoodsCache] = useLocalStorage<FoodItem[]>('cc_foodsCache', foodsData);
 
@@ -51,15 +55,15 @@ export default function Dashboard() {
     }
   }, [activeProfile, navigate]);
 
+  // --- CORRECCIÓN AQUÍ ---
+  // Se eliminó el guion bajo (_) después de ()
   useEffect(() => {
-    // Initialize foods cache
     setFoodsCache(foodsData);
   }, [setFoodsCache]);
+  // --- FIN CORRECIÓN ---
 
-  // --- `filteredFoods` AHORA USA `customFoods` ---
   const filteredFoods = useMemo(() => {
     const combinedFoods = [...foodsData, ...customFoods];
-    
     let filtered = combinedFoods;
     
     if (selectedCategory !== 'Todas') {
@@ -77,8 +81,8 @@ export default function Dashboard() {
       );
     }
     
-    return filtered.sort((a, b) => a.name.localeCompare(b.name)); // Ordenamos alfabéticamente
-  }, [searchQuery, selectedCategory, customFoods]); // Añadimos customFoods como dependencia
+    return filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }, [searchQuery, selectedCategory, customFoods]);
 
   const totalConsumed = useMemo(() => {
     return intakeEntries.reduce((sum, entry) => sum + (entry.kcalPerUnit * entry.units), 0);
@@ -87,7 +91,6 @@ export default function Dashboard() {
   const targetKcal = useMemo(() => {
     if (!activeProfile) return 0;
     if (activeProfile.tdee === 0) return 0;
-    
     const adjustment = GOAL_ADJUSTMENTS[activeProfile.goal || 'maintenance'];
     return Math.round(activeProfile.tdee + adjustment);
   }, [activeProfile]);
@@ -99,21 +102,17 @@ export default function Dashboard() {
         remainingText: "" 
       };
     }
-    
     const goal = targetKcal;
-
     if (goal === 0) {
       return {
         motivationalPhrase: "Ve a 'Mis Datos' para calcular tu meta.",
         remainingText: "Meta no calculada"
       };
     }
-
     const consumed = Math.round(totalConsumed);
     const remaining = goal - consumed;
     const caloriesOver = consumed - goal;
     const percentage = goal > 0 ? (consumed / goal) * 100 : 0; 
-
     let phrase = "";
     let remText = "";
 
@@ -146,7 +145,6 @@ export default function Dashboard() {
         phrase = "Meta superada. Un día no define tu progreso. ¡Ánimo!";
       }
     }
-
     return { 
       motivationalPhrase: phrase, 
       remainingText: remText
@@ -163,7 +161,6 @@ export default function Dashboard() {
 
   const handleAddFood = (food: FoodItem) => {
     const existingEntry = intakeEntries.find(entry => entry.foodId === food.id);
-
     if (existingEntry) {
       handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
     } else {
@@ -179,7 +176,6 @@ export default function Dashboard() {
     }
   };
 
-  // --- `handleAddManual` ACTUALIZADO ---
   const handleAddManual = (e: React.FormEvent) => {
     e.preventDefault();
     if (!manualName.trim() || !manualKcal) return;
@@ -188,43 +184,34 @@ export default function Dashboard() {
     const kcal = Number(manualKcal);
     const name = manualName.trim();
 
-    // Si el usuario quiere guardar, creamos un FoodItem
     if (saveToMyFoods) {
       const newFoodItem: FoodItem = {
         id: `custom-${Date.now()}`,
         name: name,
         category: 'Mis Alimentos',
         kcalPerServing: kcal,
-        servingName: '1 unidad', // Los alimentos manuales se guardan como "unidad"
+        servingName: '1 unidad',
         isCustom: true,
       };
-      // 1. Guardamos el nuevo FoodItem en "Mis Alimentos"
       setCustomFoods(prev => [...prev, newFoodItem]);
-      
-      // 2. Añadimos el item al consumo usando la lógica existente
-      // Si el usuario puso más de 1 unidad, la respetamos
       if (units > 1) {
-        // Creamos la entrada base...
         const newEntry: IntakeEntry = {
           id: `entry-${Date.now()}`,
           dateISO: today,
           foodId: newFoodItem.id,
           kcalPerUnit: newFoodItem.kcalPerServing,
-          units: units, // ...con las unidades especificadas
+          units: units,
           timestamp: Date.now(),
         };
         setIntakeEntries([...intakeEntries, newEntry]);
       } else {
-        // Si solo es 1 unidad, la función handleAddFood lo hace por nosotros
         handleAddFood(newFoodItem);
       }
-
     } else {
-      // Lógica anterior: solo añade una entrada de consumo, no la guarda
       const newEntry: IntakeEntry = {
         id: `entry-${Date.now()}`,
         dateISO: today,
-        customName: name, // Se guarda como 'customName'
+        customName: name,
         kcalPerUnit: kcal,
         units: units,
         timestamp: Date.now(),
@@ -232,12 +219,11 @@ export default function Dashboard() {
       setIntakeEntries([...intakeEntries, newEntry]);
     }
     
-    // Reseteamos el formulario
     setManualName('');
     setManualKcal('');
     setManualUnits('1');
-    setSaveToMyFoods(false); // Reseteamos el checkbox
-    setShowAddManual(false);
+    setSaveToMyFoods(false);
+    setShowAddManual(false); // Cierra el diálogo
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -259,16 +245,29 @@ export default function Dashboard() {
 
   const handleGoalChange = (newGoal: Goal) => {
     if (!activeProfile) return;
-    
     if (activeProfile.tdee === 0) {
       alert("Primero necesitas calcular tus datos en la página de registro.");
       navigate('/registro');
       return;
     }
-    
     updateActiveProfile({ goal: newGoal });
   };
 
+  const handleExport = async () => {
+    if (!activeProfile) return;
+    try {
+      await exportToPDF({
+        profile: activeProfile,
+        date: getCurrentDateISO(),
+        entries: intakeEntries,
+        foods: [...foodsData, ...customFoods],
+        totalConsumed: totalConsumed,
+      });
+    } catch (error) {
+      console.error('Error exporting PDF:', error);
+      alert('Error al exportar el PDF. Por favor intenta de nuevo.');
+    }
+  };
 
   if (!activeProfile) return null;
 
@@ -299,7 +298,69 @@ export default function Dashboard() {
         
         <main className={styles.mainContent}>
           <section className={styles.catalogSection}>
-            <h2>Catálogo de alimentos</h2>
+            
+            <div className={styles.sectionHeader}>
+              <h2>Catálogo de alimentos</h2>
+              <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
+                <DialogTrigger asChild>
+                  <button className={styles.buttonSecondary}>
+                    <Plus size={18} />
+                    Añadir Manual
+                  </button>
+                </DialogTrigger>
+                <DialogContent>
+                  <DialogHeader>
+                    <DialogTitle>Añadir alimento manual</DialogTitle>
+                  </DialogHeader>
+                  <form onSubmit={handleAddManual} className={styles.manualForm}>
+                    <div className={styles.manualFormGrid}>
+                      <input
+                        type="text"
+                        value={manualName}
+                        onChange={(e) => setManualName(e.target.value)}
+                        placeholder="Nombre del alimento"
+                        className={styles.input}
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={manualKcal}
+                        onChange={(e) => setManualKcal(e.target.value)}
+                        placeholder="Kcal por unidad"
+                        min="1"
+                        className={styles.input}
+                        required
+                      />
+                      <input
+                        type="number"
+                        value={manualUnits}
+                        onChange={(e) => setManualUnits(e.target.value)}
+                        placeholder="Unidades"
+                        min="1"
+                        className={styles.input}
+                        required
+                      />
+                    </div>
+                    
+                    <div className={styles.saveFoodCheckbox}>
+                      <input 
+                        type="checkbox"
+                        id="saveToMyFoods"
+                        checked={saveToMyFoods}
+                        onChange={(e) => setSaveToMyFoods(e.target.checked)}
+                      />
+                      <label htmlFor="saveToMyFoods">
+                        Guardar en "Mis Alimentos"
+                      </label>
+                    </div>
+
+                    <button type="submit" className={styles.buttonPrimary}>
+                      Agregar
+                    </button>
+                  </form>
+                </DialogContent>
+              </Dialog>
+            </div>
             
             <div className={styles.filters}>
               <SearchBar value={searchQuery} onChange={setSearchQuery} />
@@ -359,83 +420,25 @@ export default function Dashboard() {
               <div className={styles.progressText}>
                 <p className={styles.remainingText}>{remainingText}</p>
                 <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
+
               </div>
             </section>
 
 
             <section className={styles.intakeSection}>
+              
               <div className={styles.sectionHeader}>
                 <h2>Consumo de hoy</h2>
-              </div>
-
-              <div className={styles.intakeActionsAndForm}>
-                <div className={styles.sectionActions}>
-                  <ExportPanel
-                    profile={activeProfile}
-                    entries={intakeEntries}
-                    foods={foodsData}
-                    totalConsumed={totalConsumed}
-                  />
-                  <button onClick={() => setShowAddManual(!showAddManual)} className={styles.buttonSecondary}>
-                    <Plus size={18} />
-                    Manual
+                <div className={styles.intakeHeaderActions}>
+                  <button onClick={handleExport} className={styles.iconButton} aria-label="Exportar PDF">
+                    <Download size={18} />
                   </button>
                   {intakeEntries.length > 0 && (
-                    <button onClick={handleReset} className={styles.buttonDanger}>
+                    <button onClick={handleReset} className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
                       <RotateCcw size={18} />
-                      Reiniciar
                     </button>
                   )}
                 </div>
-
-                {showAddManual && (
-                  <form onSubmit={handleAddManual} className={styles.manualForm}>
-                    <input
-                      type="text"
-                      value={manualName}
-                      onChange={(e) => setManualName(e.target.value)}
-                      placeholder="Nombre del alimento"
-                      className={styles.input}
-                      required
-                    />
-                    <input
-                      type="number"
-                      value={manualKcal}
-                      onChange={(e) => setManualKcal(e.target.value)}
-                      placeholder="Kcal por unidad"
-                      min="1"
-                      className={styles.input}
-                      required
-                    />
-                    <input
-                      type="number"
-                      value={manualUnits}
-                      onChange={(e) => setManualUnits(e.target.value)}
-                      placeholder="Unidades"
-                      min="1"
-                      className={styles.input}
-                      required
-                    />
-                    
-                    {/* --- CHECKBOX AÑADIDO --- */}
-                    <div className={styles.saveFoodCheckbox}>
-                      <input 
-                        type="checkbox"
-                        id="saveToMyFoods"
-                        checked={saveToMyFoods}
-                        onChange={(e) => setSaveToMyFoods(e.target.checked)}
-                      />
-                      <label htmlFor="saveToMyFoods">
-                        Guardar en "Mis Alimentos"
-                      </label>
-                    </div>
-                    {/* --- FIN DEL CHECKBOX --- */}
-
-                    <button type="submit" className={styles.buttonPrimary}>
-                      Agregar
-                    </button>
-                  </form>
-                )}
               </div>
 
               {intakeEntries.length === 0 ? (
@@ -445,8 +448,6 @@ export default function Dashboard() {
               ) : (
                 <div className={styles.intakeList}>
                   {intakeEntries.map(entry => {
-                    // --- LÓGICA DE BÚSQUEDA ACTUALIZADA ---
-                    // Ahora busca en ambos, `foodsData` y `customFoods`
                     const food = entry.foodId 
                       ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
                       : undefined;
