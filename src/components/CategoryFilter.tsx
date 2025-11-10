@@ -2,6 +2,7 @@ import styles from './CategoryFilter.module.css';
 
 const CATEGORIES = [
   'Todas',
+  'Mis Alimentos', // --- CATEGORÍA AÑADIDA ---
   'Cereales sin grasa',
   'Cereales con grasa',
   'Verduras',
