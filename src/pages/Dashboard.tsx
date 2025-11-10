@@ -11,7 +11,7 @@ import { CategoryFilter } from '../components/CategoryFilter';
 import { ExportPanel } from '../components/ExportPanel';
 import { FoodItem, IntakeEntry } from '../types';
 import { getCurrentDateISO } from '../utils/date';
-import { LogOut, Plus, RotateCcw, History } from 'lucide-react';
+import { LogOut, Plus, RotateCcw, BarChart3 } from 'lucide-react';
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -68,6 +68,71 @@ export default function Dashboard() {
     return intakeEntries.reduce((sum, entry) => sum + (entry.kcalPerUnit * entry.units), 0);
   }, [intakeEntries]);
 
+  // --- LÓGICA DE FRASES DINÁMICAS CORREGIDA ---
+  const { motivationalPhrase, remainingText } = useMemo(() => {
+    if (!activeProfile || activeProfile.tdee === 0) {
+      return { 
+        motivationalPhrase: "Define tu meta para empezar.",
+        remainingText: "" 
+      };
+    }
+
+    const goal = Math.round(activeProfile.tdee);
+    const consumed = Math.round(totalConsumed);
+    const remaining = goal - consumed;
+    const caloriesOver = consumed - goal;
+    // Usamos el porcentaje exacto para la lógica
+    const percentage = goal > 0 ? (consumed / goal) * 100 : 0; 
+
+    let phrase = "";
+    let remText = "";
+
+    if (percentage === 0) {
+      phrase = "¡Un gran viaje empieza con un bocado!";
+      remText = `Te faltan ${remaining} kcal`;
+    } else if (percentage < 25) {
+      phrase = "¡Buen comienzo! Sigue así.";
+      remText = `Te faltan ${remaining} kcal`;
+    } else if (percentage < 50) {
+      phrase = "Vas a mitad de camino, ¡no te detengas!";
+      remText = `Te faltan ${remaining} kcal`;
+    } else if (percentage < 75) {
+      phrase = "Estás haciendo un gran trabajo.";
+      remText = `Te faltan ${remaining} kcal`;
+    } else if (percentage < 90) {
+      phrase = "Estás muy cerca, ¡no te detengas!";
+      remText = `Te faltan ${remaining} kcal`;
+    
+    // --- CAMBIOS AQUÍ ---
+    // (90% a 99.9...%)
+    } else if (percentage < 100) { 
+      phrase = "Ya casi llegas, ¡sigue así!"; // Tu frase solicitada
+      remText = `Te faltan ${remaining} kcal`;
+    
+    // (Exactamente 100%)
+    } else if (percentage === 100) { 
+      phrase = "¡Felicidades! ¡Meta alcanzada!";
+      remText = "¡Justo en la meta!";
+    
+    // (Más de 100%)
+    } else { 
+      remText = `Te has pasado por ${caloriesOver} kcal`;
+      if (caloriesOver > 50) {
+        phrase = "Te pasaste del límite. ¡Mañana volvemos al plan!";
+      } else {
+        phrase = "Meta superada. Un día no define tu progreso. ¡Ánimo!";
+      }
+    }
+    // --- FIN DE CAMBIOS ---
+
+    return { 
+      motivationalPhrase: phrase, 
+      remainingText: remText
+    };
+
+  }, [totalConsumed, activeProfile]);
+  // --- FIN DE LA LÓGICA ---
+
   const handleUpdateUnits = (id: string, units: number) => {
     setIntakeEntries(
       intakeEntries.map(entry =>
@@ -77,14 +142,11 @@ export default function Dashboard() {
   };
 
   const handleAddFood = (food: FoodItem) => {
-    // 1. Buscar si ya existe una entrada para este foodId
     const existingEntry = intakeEntries.find(entry => entry.foodId === food.id);
 
     if (existingEntry) {
-      // 2. Si existe, usa la función que ya tienes para actualizar las unidades
       handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
     } else {
-      // 3. Si no existe, crea la nueva entrada (como antes)
       const newEntry: IntakeEntry = {
         id: `entry-${Date.now()}`,
         dateISO: today,
@@ -141,12 +203,12 @@ export default function Dashboard() {
       <header className={styles.header}>
         <div className={styles.headerContent}>
           <div>
-            <h1 className={styles.title}>Hola, {activeProfile.name}</h1>
+            <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
             <p className={styles.subtitle}>Tu meta: {Math.round(activeProfile.tdee)} kcal/día</p>
           </div>
           <div className={styles.headerActions}>
             <Link to="/historial" className={styles.iconButton} aria-label="Ver historial">
-              <History size={20} />
+              <BarChart3 size={20} />
             </Link>
             <ThemeToggle />
             <button onClick={handleLogout} className={styles.iconButton} aria-label="Cambiar perfil">
@@ -156,109 +218,128 @@ export default function Dashboard() {
         </div>
       </header>
 
-      <main className={styles.main}>
-        <section className={styles.progressSection}>
-          <ProgressRing consumed={totalConsumed} goal={activeProfile.tdee} />
-        </section>
+      <div className={styles.dashboardLayout}>
+        
+        <main className={styles.mainContent}>
+          <section className={styles.catalogSection}>
+            <h2>Catálogo de alimentos</h2>
+            
+            <div className={styles.filters}>
+              <SearchBar value={searchQuery} onChange={setSearchQuery} />
+              <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+            </div>
 
-        <section className={styles.intakeSection}>
-          <div className={styles.sectionHeader}>
-            <h2>Consumo de hoy</h2>
-            <div className={styles.sectionActions}>
-              <ExportPanel
-                profile={activeProfile}
-                entries={intakeEntries}
-                foods={foodsData}
-                totalConsumed={totalConsumed}
-              />
-              <button onClick={() => setShowAddManual(!showAddManual)} className={styles.buttonSecondary}>
-                <Plus size={18} />
-                Manual
-              </button>
-              {intakeEntries.length > 0 && (
-                <button onClick={handleReset} className={styles.buttonDanger}>
-                  <RotateCcw size={18} />
-                  Reiniciar
-                </button>
+            <div className={styles.foodGrid}>
+              {filteredFoods.length === 0 ? (
+                <p className={styles.emptyState}>No se encontraron alimentos</p>
+              ) : (
+                filteredFoods.map(food => (
+                  <FoodCard key={food.id} food={food} onAdd={handleAddFood} />
+                ))
               )}
             </div>
-          </div>
+          </section>
+        </main>
 
-          {showAddManual && (
-            <form onSubmit={handleAddManual} className={styles.manualForm}>
-              <input
-                type="text"
-                value={manualName}
-                onChange={(e) => setManualName(e.target.value)}
-                placeholder="Nombre del alimento"
-                className={styles.input}
-                required
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarContent}>
+            
+            <section className={styles.progressSection}>
+              <ProgressRing 
+                consumed={totalConsumed} 
+                goal={activeProfile.tdee} 
               />
-              <input
-                type="number"
-                value={manualKcal}
-                onChange={(e) => setManualKcal(e.target.value)}
-                placeholder="Kcal por unidad"
-                min="1"
-                className={styles.input}
-                required
-              />
-              <input
-                type="number"
-                value={manualUnits}
-                onChange={(e) => setManualUnits(e.target.value)}
-                placeholder="Unidades"
-                min="1"
-                className={styles.input}
-                required
-              />
-              <button type="submit" className={styles.buttonPrimary}>
-                Agregar
-              </button>
-            </form>
-          )}
+              <div className={styles.progressText}>
+                <p className={styles.remainingText}>{remainingText}</p>
+                <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
+              </div>
+            </section>
 
-          {intakeEntries.length === 0 ? (
-            <p className={styles.emptyState}>
-              Aún no registras alimentos. Busca "manzana" o "arroz" para empezar.
-            </p>
-          ) : (
-            <div className={styles.intakeList}>
-              {intakeEntries.map(entry => {
-                const food = entry.foodId ? foodsData.find(f => f.id === entry.foodId) : undefined;
-                return (
-                  <IntakeItem
-                    key={entry.id}
-                    entry={entry}
-                    food={food}
-                    onUpdateUnits={handleUpdateUnits}
-                    onDelete={handleDeleteEntry}
+
+            <section className={styles.intakeSection}>
+              <div className={styles.sectionHeader}>
+                <h2>Consumo de hoy</h2>
+              </div>
+
+              <div className={styles.intakeActionsAndForm}>
+                <div className={styles.sectionActions}>
+                  <ExportPanel
+                    profile={activeProfile}
+                    entries={intakeEntries}
+                    foods={foodsData}
+                    totalConsumed={totalConsumed}
                   />
-                );
-              })}
-            </div>
-          )}
-        </section>
+                  <button onClick={() => setShowAddManual(!showAddManual)} className={styles.buttonSecondary}>
+                    <Plus size={18} />
+                    Manual
+                  </button>
+                  {intakeEntries.length > 0 && (
+                    <button onClick={handleReset} className={styles.buttonDanger}>
+                      <RotateCcw size={18} />
+                      Reiniciar
+                    </button>
+                  )}
+                </div>
 
-        <section className={styles.catalogSection}>
-          <h2>Catálogo de alimentos</h2>
-          
-          <div className={styles.filters}>
-            <SearchBar value={searchQuery} onChange={setSearchQuery} />
-            <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
-          </div>
+                {showAddManual && (
+                  <form onSubmit={handleAddManual} className={styles.manualForm}>
+                    <input
+                      type="text"
+                      value={manualName}
+                      onChange={(e) => setManualName(e.target.value)}
+                      placeholder="Nombre del alimento"
+                      className={styles.input}
+                      required
+                    />
+                    <input
+                      type="number"
+                      value={manualKcal}
+                      onChange={(e) => setManualKcal(e.target.value)}
+                      placeholder="Kcal por unidad"
+                      min="1"
+                      className={styles.input}
+                      required
+                    />
+                    <input
+                      type="number"
+                      value={manualUnits}
+                      onChange={(e) => setManualUnits(e.target.value)}
+                      placeholder="Unidades"
+                      min="1"
+                      className={styles.input}
+                      required
+                    />
+                    <button type="submit" className={styles.buttonPrimary}>
+                      Agregar
+                    </button>
+                  </form>
+                )}
+              </div>
 
-          <div className={styles.foodGrid}>
-            {filteredFoods.length === 0 ? (
-              <p className={styles.emptyState}>No se encontraron alimentos</p>
-            ) : (
-              filteredFoods.map(food => (
-                <FoodCard key={food.id} food={food} onAdd={handleAddFood} />
-              ))
-            )}
+              {intakeEntries.length === 0 ? (
+                <p className={styles.emptyState}>
+                  Aún no registras alimentos. Busca "manzana" o "arroz" para empezar.
+                </p>
+              ) : (
+                <div className={styles.intakeList}>
+                  {intakeEntries.map(entry => {
+                    const food = entry.foodId ? foodsData.find(f => f.id === entry.foodId) : undefined;
+                    return (
+                      <IntakeItem
+                        key={entry.id}
+                        entry={entry}
+                        food={food}
+                        onUpdateUnits={handleUpdateUnits}
+                        onDelete={handleDeleteEntry}
+                      />
+                    );
+                  })}
+                </div>
+              )}
+            </section>
           </div>
-        </section>
-      </main>
+        </aside>
+      </div>
     </div>
   );
 }
