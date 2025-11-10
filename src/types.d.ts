@@ -4,6 +4,8 @@ export type Sex = "male" | "female";
 
 export type ActivityLevel = "sedentario" | "ligero" | "moderado" | "intenso" | "muy_intenso";
 
+export type Goal = "deficit" | "maintenance" | "surplus";
+
 export interface Profile {
   id: string;
   name: string;
@@ -14,6 +16,7 @@ export interface Profile {
   heightCm: number;
   activity: ActivityLevel;
   tdee: number;
+  goal: Goal; 
   createdAt: string;
 }
 
@@ -24,6 +27,7 @@ export interface FoodItem {
   kcalPerServing: number;
   servingName: string;
   kcalPer100g?: number;
+  isCustom?: boolean; // --- PROPIEDAD AÑADIDA ---
 }
 
 export interface IntakeEntry {
