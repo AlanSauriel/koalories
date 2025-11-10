@@ -14,6 +14,10 @@ export default function Login() {
     login,
     deleteProfile,
   } = useSession();
+
+  // --- ESTADO AÑADIDO ---
+  const [isRegistering, setIsRegistering] = useState(false);
+
   const [loginName, setLoginName] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -131,172 +135,201 @@ export default function Login() {
         </div>
 
         <div className={styles.cardsGrid}>
-          <section className={`${styles.card} ${styles.loginCard}`}>
-            <div className={styles.cardHeader}>
-              <h2>Iniciar sesión</h2>
-              <p>Accede con tu perfil guardado para continuar donde lo dejaste.</p>
-            </div>
-
-            {loginError && (
-              <div className={styles.error} role="alert" aria-live="assertive">
-                {loginError}
+          {/* --- RENDERIZADO CONDICIONAL: MUESTRA LOGIN --- */}
+          {!isRegistering ? (
+            <section className={`${styles.card} ${styles.loginCard}`}>
+              <div className={styles.cardHeader}>
+                <h2>Iniciar sesión</h2>
+                <p>Accede con tu perfil guardado para continuar donde lo dejaste.</p>
               </div>
-            )}
 
-            <form onSubmit={handleLogin} className={styles.form} noValidate>
-              <div className={styles.field}>
-                <label htmlFor={loginNameId} className={styles.label}>
-                  Nombre de usuario
-                </label>
-                <input
-                  id={loginNameId}
-                  type="text"
-                  value={loginName}
-                  onChange={(e) => setLoginName(e.target.value)}
-                  placeholder="Ej. MariaFit"
-                  className={styles.input}
-                  maxLength={50}
-                  autoComplete="username"
-                  required
-                />
-              </div>
-              <div className={styles.field}>
-                <label htmlFor={loginPasswordId} className={styles.label}>
-                  Contraseña
-                </label>
-                <input
-                  id={loginPasswordId}
-                  type="password"
-                  value={loginPassword}
-                  onChange={(e) => setLoginPassword(e.target.value)}
-                  placeholder="••••••"
-                  className={styles.input}
-                  minLength={4}
-                  ref={loginPasswordRef}
-                  autoComplete="current-password"
-                  required
-                />
-              </div>
-              <button type="submit" className={styles.buttonPrimary} disabled={isLoginDisabled}>
-                <LogIn size={20} />
-                Entrar
-              </button>
-            </form>
+              {loginError && (
+                <div className={styles.error} role="alert" aria-live="assertive">
+                  {loginError}
+                </div>
+              )}
 
-            {hasSavedProfiles ? (
-              <div className={styles.profilesList}>
-                <h3>Perfiles guardados</h3>
-                {formattedProfiles.map(profile => {
-                  const isSelected = normalizedLoginName === profile.name.toLowerCase();
+              <form onSubmit={handleLogin} className={styles.form} noValidate>
+                <div className={styles.field}>
+                  <label htmlFor={loginNameId} className={styles.label}>
+                    Nombre de usuario
+                  </label>
+                  <input
+                    id={loginNameId}
+                    type="text"
+                    value={loginName}
+                    onChange={(e) => setLoginName(e.target.value)}
+                    placeholder="Ej. MariaFit"
+                    className={styles.input}
+                    maxLength={50}
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor={loginPasswordId} className={styles.label}>
+                    Contraseña
+                  </label>
+                  <input
+                    id={loginPasswordId}
+                    type="password"
+                    value={loginPassword}
+                    onChange={(e) => setLoginPassword(e.target.value)}
+                    placeholder="••••••"
+                    className={styles.input}
+                    minLength={4}
+                    ref={loginPasswordRef}
+                    autoComplete="current-password"
+                    required
+                  />
+                </div>
+                <button type="submit" className={styles.buttonPrimary} disabled={isLoginDisabled}>
+                  <LogIn size={20} />
+                  Entrar
+                </button>
+              </form>
 
-                  return (
-                    <div key={profile.id} className={styles.profileItem}>
-                      <button
-                        type="button"
-                        onClick={() => handleSelectProfile(profile.name)}
-                        className={`${styles.profileButton} ${isSelected ? styles.profileButtonActive : ''}`}
-                        aria-pressed={isSelected}
-                      >
-                        <div className={styles.profileInfo}>
-                          <span className={styles.profileName}>{profile.name}</span>
-                          <span className={styles.profileMeta}>
-                            Creado el {profile.formattedDate}
-                          </span>
-                          {profile.tdee > 0 && (
-                            <span className={styles.profileMeta}>
-                              Meta: {Math.round(profile.tdee)} kcal
-                            </span>
-                          )}
-                        </div>
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => handleDeleteProfile(profile.id)}
-                        className={styles.deleteButton}
-                        aria-label={`Eliminar ${profile.name}`}
-                      >
-                        <Trash2 size={18} />
-                      </button>
-                    </div>
-                  );
-                })}
-              </div>
-            ) : (
+              {/* --- BOTÓN DE INTERCAMBIO --- */}
               <p className={styles.helperText}>
-                Aún no hay perfiles creados. Regístrate para comenzar a usar la app.
+                ¿No tienes un perfil?{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsRegistering(true)}
+                  className={styles.toggleButton}
+                >
+                  Crea una cuenta aquí
+                </button>
               </p>
-            )}
-          </section>
 
-          <section className={`${styles.card} ${styles.registerCard}`}>
-            <div className={styles.cardHeader}>
-              <h2>Crear cuenta</h2>
-              <p>Genera un perfil nuevo y guarda tus datos de progreso.</p>
-            </div>
+              {hasSavedProfiles ? (
+                <div className={styles.profilesList}>
+                  <h3>Perfiles guardados</h3>
+                  {formattedProfiles.map(profile => {
+                    const isSelected = normalizedLoginName === profile.name.toLowerCase();
 
-            {registerError && (
-              <div className={styles.error} role="alert" aria-live="assertive">{registerError}</div>
-            )}
-
-            <form onSubmit={handleRegister} className={styles.form} noValidate>
-              <div className={styles.field}>
-                <label htmlFor={registerNameId} className={styles.label}>
-                  Nombre para mostrar
-                </label>
-                <input
-                  id={registerNameId}
-                  type="text"
-                  value={registerName}
-                  onChange={(e) => setRegisterName(e.target.value)}
-                  placeholder="Tu nombre o apodo"
-                  className={styles.input}
-                  maxLength={50}
-                  autoComplete="username"
-                  required
-                />
+                    return (
+                      <div key={profile.id} className={styles.profileItem}>
+                        <button
+                          type="button"
+                          onClick={() => handleSelectProfile(profile.name)}
+                          className={`${styles.profileButton} ${isSelected ? styles.profileButtonActive : ''}`}
+                          aria-pressed={isSelected}
+                        >
+                          <div className={styles.profileInfo}>
+                            <span className={styles.profileName}>{profile.name}</span>
+                            <span className={styles.profileMeta}>
+                              Creado el {profile.formattedDate}
+                            </span>
+                            {profile.tdee > 0 && (
+                              <span className={styles.profileMeta}>
+                                Meta: {Math.round(profile.tdee)} kcal
+                              </span>
+                            )}
+                          </div>
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDeleteProfile(profile.id)}
+                          className={styles.deleteButton}
+                          aria-label={`Eliminar ${profile.name}`}
+                        >
+                          <Trash2 size={18} />
+                        </button>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <p className={styles.helperText}>
+                  Aún no hay perfiles creados. Regístrate para comenzar a usar la app.
+                </p>
+              )}
+            </section>
+          ) : (
+            
+            /* --- RENDERIZADO CONDICIONAL: MUESTRA REGISTRO --- */
+            <section className={`${styles.card} ${styles.registerCard}`}>
+              <div className={styles.cardHeader}>
+                <h2>Crear cuenta</h2>
+                <p>Genera un perfil nuevo y guarda tus datos de progreso.</p>
               </div>
-              <div className={styles.field}>
-                <label htmlFor={registerPasswordId} className={styles.label}>
-                  Contraseña
-                </label>
-                <input
-                  id={registerPasswordId}
-                  type="password"
-                  value={registerPassword}
-                  onChange={(e) => setRegisterPassword(e.target.value)}
-                  placeholder="Mínimo 4 caracteres"
-                  className={styles.input}
-                  minLength={4}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-              <div className={styles.field}>
-                <label htmlFor={registerConfirmId} className={styles.label}>
-                  Confirmar contraseña
-                </label>
-                <input
-                  id={registerConfirmId}
-                  type="password"
-                  value={registerConfirm}
-                  onChange={(e) => setRegisterConfirm(e.target.value)}
-                  placeholder="Repite tu contraseña"
-                  className={styles.input}
-                  minLength={4}
-                  autoComplete="new-password"
-                  required
-                />
-              </div>
-              <button type="submit" className={styles.buttonSecondary} disabled={isRegisterDisabled}>
-                <UserPlus size={20} />
-                Registrarme
-              </button>
-            </form>
 
-            <p className={styles.helperText}>
-              Tras crear tu cuenta completaremos tus datos físicos para personalizar las calorías.
-            </p>
-          </section>
+              {registerError && (
+                <div className={styles.error} role="alert" aria-live="assertive">{registerError}</div>
+              )}
+
+              <form onSubmit={handleRegister} className={styles.form} noValidate>
+                <div className={styles.field}>
+                  <label htmlFor={registerNameId} className={styles.label}>
+                    Nombre para mostrar
+                  </label>
+                  <input
+                    id={registerNameId}
+                    type="text"
+                    value={registerName}
+                    onChange={(e) => setRegisterName(e.target.value)}
+                    placeholder="Tu nombre o apodo"
+                    className={styles.input}
+                    maxLength={50}
+                    autoComplete="username"
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor={registerPasswordId} className={styles.label}>
+                    Contraseña
+                  </label>
+                  <input
+                    id={registerPasswordId}
+                    type="password"
+                    value={registerPassword}
+                    onChange={(e) => setRegisterPassword(e.target.value)}
+                    placeholder="Mínimo 4 caracteres"
+                    className={styles.input}
+                    minLength={4}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
+                <div className={styles.field}>
+                  <label htmlFor={registerConfirmId} className={styles.label}>
+                    Confirmar contraseña
+                  </label>
+                  <input
+                    id={registerConfirmId}
+                    type="password"
+                    value={registerConfirm}
+                    onChange={(e) => setRegisterConfirm(e.target.value)}
+                    placeholder="Repite tu contraseña"
+                    className={styles.input}
+                    minLength={4}
+                    autoComplete="new-password"
+                    required
+                  />
+                </div>
+                <button type="submit" className={styles.buttonSecondary} disabled={isRegisterDisabled}>
+                  <UserPlus size={20} />
+                  Registrarme
+                </button>
+              </form>
+
+              <p className={styles.helperText}>
+                Tras crear tu cuenta completaremos tus datos físicos para personalizar las calorías.
+              </p>
+
+              {/* --- BOTÓN DE INTERCAMBIO --- */}
+              <p className={styles.helperText}>
+                ¿Ya tienes una cuenta?{' '}
+                <button
+                  type="button"
+                  onClick={() => setIsRegistering(false)}
+                  className={styles.toggleButton}
+                >
+                  Inicia sesión aquí
+                </button>
+              </p>
+            </section>
+          )}
         </div>
 
         <p className={styles.disclaimer} role="note">
