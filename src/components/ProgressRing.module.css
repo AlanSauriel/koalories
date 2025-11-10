@@ -2,12 +2,10 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: var(--spacing-xl);
-  padding: var(--spacing-xl);
-  background: var(--bg-card);
-  border-radius: var(--radius-xl);
-  box-shadow: var(--shadow-lg);
-  border: 1px solid var(--border-color);
+  /* Quitamos el padding y fondo de tarjeta de aquí.
+    Ahora lo maneja .progressSection en Dashboard.module.css
+  */
+  gap: var(--spacing-lg); 
 }
 
 .ring {
@@ -27,7 +25,7 @@
   gap: var(--spacing-sm);
   font-size: var(--font-size-2xl);
   font-weight: 600;
-  margin-bottom: var(--spacing-md);
+  margin-bottom: 0; /* Ajustado */
 }
 
 .consumed {
@@ -42,21 +40,10 @@
   color: var(--text-secondary);
 }
 
-.remaining,
-.over {
-  font-size: var(--font-size-lg);
-  color: var(--text-secondary);
-  margin-bottom: var(--spacing-sm);
-}
-
-.message {
-  font-size: var(--font-size-base);
-  color: var(--text-primary);
-  font-weight: 500;
-  padding: var(--spacing-md);
-  background: var(--bg-secondary);
-  border-radius: var(--radius-md);
-}
+/* Las clases .remaining, .over, y .message 
+  fueron eliminadas ya que ese texto ahora 
+  se maneja en Dashboard.tsx
+*/
 
 @media (max-width: 768px) {
   .ring {
