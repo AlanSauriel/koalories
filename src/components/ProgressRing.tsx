@@ -10,6 +10,8 @@ interface ProgressRingProps {
   goal: number;
 }
 
+// Los mensajes ahora se manejan en Dashboard.tsx,
+// pero mantenemos la lógica de estado para los colores del anillo.
 const MESSAGES = {
   ok: [
     'Vas muy bien, sigue así',
@@ -34,18 +36,20 @@ const MESSAGES = {
 export function ProgressRing({ consumed, goal }: ProgressRingProps) {
   const safeGoal = goal > 0 ? goal : 1;
   const rawPercent = goal > 0 ? (consumed / safeGoal) * 100 : 0;
-  const percent = Math.min(Math.max(rawPercent, 0), 200);
-  const remaining = goal > 0 ? goal - consumed : 0;
+  // Modificamos 'percent' para que el anillo se detenga en 100%
+  // El texto del Dashboard manejará los porcentajes mayores a 100
+  const percent = Math.min(Math.max(rawPercent, 0), 100); 
 
   let state: ProgressState;
   let pathColor: string;
   let trailColor: string;
   
-  if (percent <= 95) {
+  // Usamos 'rawPercent' (el porcentaje real) para determinar el color
+  if (rawPercent <= 95) {
     state = 'ok';
     pathColor = 'hsl(142, 70%, 45%)';
     trailColor = 'hsla(142, 70%, 45%, 0.1)';
-  } else if (percent <= 105) {
+  } else if (rawPercent <= 105) {
     state = 'near';
     pathColor = 'hsl(36, 94%, 55%)';
     trailColor = 'hsla(36, 94%, 55%, 0.1)';
@@ -55,31 +59,17 @@ export function ProgressRing({ consumed, goal }: ProgressRingProps) {
     trailColor = 'hsla(0, 84%, 58%, 0.1)';
   }
 
-  const lastMessage = useRef<{ state: ProgressState; message: string } | null>(null);
-
-  const message = useMemo(() => {
-    const messages = MESSAGES[state];
-
-    if (!messages || messages.length === 0) {
-      return '';
-    }
-
-    if (lastMessage.current?.state === state) {
-      return lastMessage.current.message;
-    }
-
-    const nextMessage = messages[Math.floor(Math.random() * messages.length)];
-    lastMessage.current = { state, message: nextMessage };
-    return nextMessage;
-  }, [state]);
+  // --- MODIFICACIÓN ---
+  // El 'text' del anillo ahora mostrará el porcentaje real (puede ser > 100%)
+  const displayPercent = Math.round(rawPercent);
 
   return (
     <div className={styles.container}>
       <div className={styles.ring}>
         <CircularProgressbar
-          value={percent}
+          value={percent} // El visual se detiene en 100
           maxValue={100}
-          text={`${Math.round(percent)}%`}
+          text={`${displayPercent}%`} // El texto muestra el % real
           styles={buildStyles({
             pathColor,
             textColor: 'var(--text-primary)',
@@ -89,6 +79,8 @@ export function ProgressRing({ consumed, goal }: ProgressRingProps) {
         />
       </div>
       
+      {/* --- MODIFICACIÓN --- */}
+      {/* Eliminamos el texto estático de aquí */}
       <div className={styles.info}>
         <div className={styles.stats}>
           <span className={styles.consumed}>{formatCalories(consumed)}</span>
@@ -96,19 +88,10 @@ export function ProgressRing({ consumed, goal }: ProgressRingProps) {
           <span className={styles.goal}>{formatCalories(goal)}</span>
         </div>
         
-        {remaining > 0 ? (
-          <p className={styles.remaining}>
-            Te faltan <strong>{formatCalories(remaining)}</strong>
-          </p>
-        ) : (
-          <p className={styles.over}>
-            Excediste por <strong>{formatCalories(Math.abs(remaining))}</strong>
-          </p>
-        )}
-        
-        <p className={styles.message} aria-live="polite">
-          {message}
-        </p>
+        {/* Las frases "Te faltan..." y "Vas muy bien..."
+          fueron eliminadas de este componente.
+          Ahora se muestran desde Dashboard.tsx
+        */}
       </div>
     </div>
   );
