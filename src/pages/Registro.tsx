@@ -12,10 +12,21 @@ export default function Registro() {
   const { activeProfile, profiles, setProfiles } = useSession();
   const calculateCalories = useCaloriesCalculator();
 
+  // --- 1. MODIFICAR ESTADOS ---
+  // Los estados ahora guardarán un 'string' para permitir campos vacíos ("")
+  // o valores a medio escribir (ej. "70.").
   const [sex, setSex] = useState<Sex>(activeProfile?.sex || 'male');
-  const [age, setAge] = useState(activeProfile?.age || 25);
-  const [weightKg, setWeightKg] = useState(activeProfile?.weightKg || 70);
-  const [heightCm, setHeightCm] = useState(activeProfile?.heightCm || 170);
+  
+  const [age, setAge] = useState<string>(
+    activeProfile?.age ? String(activeProfile.age) : ''
+  );
+  const [weightKg, setWeightKg] = useState<string>(
+    activeProfile?.weightKg ? String(activeProfile.weightKg) : ''
+  );
+  const [heightCm, setHeightCm] = useState<string>(
+    activeProfile?.heightCm ? String(activeProfile.heightCm) : ''
+  );
+  
   const [activity, setActivity] = useState<ActivityLevel>(activeProfile?.activity || 'moderado');
 
   useEffect(() => {
@@ -28,15 +39,33 @@ export default function Registro() {
     e.preventDefault();
     if (!activeProfile) return;
 
-    const { tdee } = calculateCalories({ sex, age, weightKg, heightCm, activity });
+    // --- 2. MODIFICAR SUBMIT ---
+    // Convertimos los 'string' a 'number' solo al guardar.
+    // Usamos parseFloat para peso (permite decimales) y Number para el resto.
+    const ageNum = Number(age) || 0;
+    const weightNum = parseFloat(weightKg) || 0;
+    const heightNum = Number(heightCm) || 0;
+
+    if (ageNum < 13 || weightNum < 30 || heightNum < 120) {
+      alert("Por favor, ingresa valores válidos para edad (mín. 13), peso (mín. 30) y altura (mín. 120).");
+      return;
+    }
+
+    const { tdee } = calculateCalories({ 
+      sex, 
+      age: ageNum, 
+      weightKg: weightNum, 
+      heightCm: heightNum, 
+      activity 
+    });
 
     const updatedProfile = {
       ...activeProfile,
       password: activeProfile.password || '',
       sex,
-      age,
-      weightKg,
-      heightCm,
+      age: ageNum,
+      weightKg: weightNum,
+      heightCm: heightNum,
       activity,
       tdee,
     };
@@ -78,6 +107,7 @@ export default function Registro() {
               </select>
             </div>
 
+            {/* --- 3. MODIFICAR INPUTS --- */}
             <div className={styles.field}>
               <label htmlFor="age">Edad (años)</label>
               <input
@@ -85,8 +115,10 @@ export default function Registro() {
                 type="number"
                 min="13"
                 max="80"
-                value={age}
-                onChange={(e) => setAge(Number(e.target.value))}
+                value={age} // El valor es el 'string' del estado
+                placeholder="Ej. 25"
+                // El onChange ahora solo guarda el string
+                onChange={(e) => setAge(e.target.value)}
                 className={styles.input}
                 required
               />
@@ -99,9 +131,11 @@ export default function Registro() {
                 type="number"
                 min="30"
                 max="250"
-                step="0.1"
-                value={weightKg}
-                onChange={(e) => setWeightKg(Number(e.target.value))}
+                step="0.1" // "step" permite los decimales
+                value={weightKg} // El valor es el 'string' del estado
+                placeholder="Ej. 70.5"
+                // El onChange ahora solo guarda el string
+                onChange={(e) => setWeightKg(e.target.value)}
                 className={styles.input}
                 required
               />
@@ -114,8 +148,10 @@ export default function Registro() {
                 type="number"
                 min="120"
                 max="220"
-                value={heightCm}
-                onChange={(e) => setHeightCm(Number(e.target.value))}
+                value={heightCm} // El valor es el 'string' del estado
+                placeholder="Ej. 175"
+                // El onChange ahora solo guarda el string
+                onChange={(e) => setHeightCm(e.target.value)}
                 className={styles.input}
                 required
               />
