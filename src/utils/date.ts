@@ -6,6 +6,14 @@ export function getCurrentDateISO(): string {
 }
 
 /**
+ * Convert a Date object to ISO format (YYYY-MM-DD)
+ * @param date The date object
+ */
+export function dateToISOString(date: Date): string {
+  return date.toISOString().split('T')[0];
+}
+
+/**
  * Format date for display
  */
 export function formatDate(dateISO: string): string {
