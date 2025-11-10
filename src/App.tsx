@@ -2,6 +2,7 @@ import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
 import { ThemeProvider } from "./context/ThemeContext";
 import { SessionProvider } from "./context/SessionContext";
+import { Toaster } from "./components/ui/toaster"; // --- IMPORTADO ---
 import Login from "./pages/Login";
 import Registro from "./pages/Registro";
 import Dashboard from "./pages/Dashboard";
@@ -24,6 +25,7 @@ const App = () => (
             <Route path="*" element={<NotFound />} />
           </Routes>
         </BrowserRouter>
+        <Toaster /> {/* --- AÑADIDO --- */}
       </SessionProvider>
     </ThemeProvider>
   </QueryClientProvider>
