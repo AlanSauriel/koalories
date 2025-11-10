@@ -2,14 +2,12 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../context/SessionContext';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { ArrowLeft, TrendingUp, TrendingDown, Target } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Target, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line, ComposedChart, Area } from 'recharts';
 import { getDaysAgo, formatDateShort, dateToISOString } from '../utils/date';
-// --- CORRECCIÓN LÍNEA 8: Quitamos HistoryPoint de aquí ---
 import { IntakeEntry, FoodItem } from '../types';
 import styles from './Historial.module.css';
 
-// --- IMPORTS AÑADIDOS ---
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "../components/ui/tabs";
 import { Calendar } from "../components/ui/calendar";
 import { useLocalStorage } from '../hooks/useLocalStorage'; 
@@ -17,12 +15,28 @@ import { IntakeItem } from '../components/IntakeItem';
 import foodsData from '../data/foods.seed.json'; 
 import { es } from 'date-fns/locale';
 
-// --- CORRECCIÓN LÍNEA 22: Añadimos la definición local ---
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "../components/ui/dialog";
+import { SearchBar } from '../components/SearchBar';
+import { CategoryFilter } from '../components/CategoryFilter';
+import { FoodCard } from '../components/FoodCard';
+
 interface HistoryPoint {
   date: string;
   kcal: number;
   goal: number;
 }
+
+// --- CAMBIO 1: Definimos 'today' aquí para deshabilitar el calendario ---
+const today = new Date();
+// Creamos una copia seteada al final del día para comparaciones
+const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+
 
 export default function Historial() {
   const navigate = useNavigate();
@@ -35,11 +49,21 @@ export default function Historial() {
   const [summaryData, setSummaryData] = useState<HistoryPoint[]>([]);
 
   const customFoodsKey = activeProfile ? `cc_customFoods_${activeProfile.id}` : '';
-  const [customFoods] = useLocalStorage<FoodItem[]>(customFoodsKey, []);
+  const [customFoods, setCustomFoods] = useLocalStorage<FoodItem[]>(customFoodsKey, []);
   
   const combinedFoods = useMemo(() => {
     return [...foodsData, ...customFoods];
   }, [customFoods]);
+  
+  const [isCatalogOpen, setIsCatalogOpen] = useState(false);
+  const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState('Todas');
+  
+  const [showAddManual, setShowAddManual] = useState(false); 
+  const [manualName, setManualName] = useState('');
+  const [manualKcal, setManualKcal] = useState('');
+  const [manualUnits, setManualUnits] = useState('1');
+  const [saveToMyFoods, setSaveToMyFoods] = useState(false);
   
   useEffect(() => {
     if (!activeProfile) {
@@ -62,6 +86,16 @@ export default function Historial() {
     } catch (error) {
       console.warn(`Error leyendo datos de localStorage para ${key}`, error);
       return [];
+    }
+  };
+
+  const writeEntriesForDate = (dateISO: string, entries: IntakeEntry[]) => {
+    if (typeof window === 'undefined' || !activeProfile) return;
+    const key = `cc_intake_${activeProfile.id}_${dateISO}`;
+    try {
+      window.localStorage.setItem(key, JSON.stringify(entries));
+    } catch (error) {
+      console.warn(`Error guardando datos en localStorage para ${key}`, error);
     }
   };
 
@@ -99,6 +133,124 @@ export default function Historial() {
     }
   }, [viewMode, selectedDate, activeProfile]);
 
+  const filteredFoods = useMemo(() => {
+    const allFoods = [...foodsData, ...customFoods];
+    let filtered = allFoods;
+    
+    if (selectedCategory !== 'Todas') {
+      if (selectedCategory === 'Mis Alimentos') {
+        filtered = customFoods;
+      } else {
+        filtered = filtered.filter(f => f.category === selectedCategory);
+      }
+    }
+    
+    if (searchQuery.trim()) {
+      const query = searchQuery.toLowerCase();
+      filtered = filtered.filter(f => 
+        f.name.toLowerCase().includes(query)
+      );
+    }
+    
+    return filtered.sort((a, b) => a.name.localeCompare(b.name));
+  }, [searchQuery, selectedCategory, customFoods]);
+  
+
+  const handleDeleteEntry = (entryId: string) => {
+    if (!selectedDate) return;
+    const dateISO = dateToISOString(selectedDate);
+    
+    const updatedEntries = selectedDayEntries.filter(entry => entry.id !== entryId);
+    setSelectedDayEntries(updatedEntries);
+    writeEntriesForDate(dateISO, updatedEntries);
+  };
+
+  const handleUpdateUnits = (entryId: string, newUnits: number) => {
+    if (!selectedDate || newUnits < 1) return;
+    const dateISO = dateToISOString(selectedDate);
+
+    const updatedEntries = selectedDayEntries.map(entry =>
+      entry.id === entryId ? { ...entry, units: newUnits } : entry
+    );
+    setSelectedDayEntries(updatedEntries);
+    writeEntriesForDate(dateISO, updatedEntries);
+  };
+
+  const handleHistoryAddFood = (food: FoodItem) => {
+    if (!selectedDate) return;
+    const dateISO = dateToISOString(selectedDate);
+
+    const existingEntry = selectedDayEntries.find(entry => entry.foodId === food.id);
+    
+    if (existingEntry) {
+      handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
+    } else {
+      const newEntry: IntakeEntry = {
+        id: `entry-${Date.now()}`,
+        dateISO: dateISO,
+        foodId: food.id,
+        kcalPerUnit: food.kcalPerServing,
+        units: 1,
+        timestamp: Date.now(),
+      };
+      const updatedEntries = [newEntry, ...selectedDayEntries];
+      setSelectedDayEntries(updatedEntries);
+      writeEntriesForDate(dateISO, updatedEntries);
+    }
+  };
+
+  const handleHistoryAddManual = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!manualName.trim() || !manualKcal || !selectedDate) return;
+
+    const dateISO = dateToISOString(selectedDate);
+    const units = Number(manualUnits) || 1;
+    const kcal = Number(manualKcal);
+    const name = manualName.trim();
+
+    if (saveToMyFoods) {
+      const newFoodItem: FoodItem = {
+        id: `custom-${Date.now()}`,
+        name: name,
+        category: 'Mis Alimentos',
+        kcalPerServing: kcal,
+        servingName: '1 unidad',
+        isCustom: true,
+      };
+      setCustomFoods(prev => [...prev, newFoodItem]);
+      const newEntry: IntakeEntry = {
+        id: `entry-${Date.now()}`,
+        dateISO: dateISO,
+        foodId: newFoodItem.id,
+        kcalPerUnit: newFoodItem.kcalPerServing,
+        units: units,
+        timestamp: Date.now(),
+      };
+      const updatedEntries = [newEntry, ...selectedDayEntries];
+      setSelectedDayEntries(updatedEntries);
+      writeEntriesForDate(dateISO, updatedEntries);
+
+    } else {
+      const newEntry: IntakeEntry = {
+        id: `entry-${Date.now()}`,
+        dateISO: dateISO,
+        customName: name,
+        kcalPerUnit: kcal,
+        units: units,
+        timestamp: Date.now(),
+      };
+      const updatedEntries = [newEntry, ...selectedDayEntries];
+      setSelectedDayEntries(updatedEntries);
+      writeEntriesForDate(dateISO, updatedEntries);
+    }
+    
+    setManualName('');
+    setManualKcal('');
+    setManualUnits('1');
+    setSaveToMyFoods(false);
+    setShowAddManual(false); 
+  };
+
 
   if (!activeProfile) return null;
 
@@ -108,6 +260,9 @@ export default function Historial() {
   const avgKcal = totalKcal / (summaryData.length || 1);
   const daysOverGoal = summaryData.filter(d => d.kcal > d.goal * 1.05).length;
   const daysUnderGoal = summaryData.filter(d => d.kcal < d.goal * 0.95).length;
+
+  // --- CAMBIO 2: Comprobar si la fecha seleccionada es futura ---
+  const isFutureDate = selectedDate ? selectedDate > endOfToday : false;
 
   return (
     <div className={styles.page}>
@@ -276,11 +431,25 @@ export default function Historial() {
                     formatDay: (date) => date.getDate().toString() 
                   }}
                   className={styles.calendar}
+                  // --- CAMBIO 3: Deshabilitar fechas futuras ---
+                  disabled={{ after: today }}
                 />
               </div>
               <div className={styles.selectedDayDetails}>
-                <h3>
+                <h3 className={styles.selectedDayHeader}>
                   Consumo del {selectedDate ? formatDateShort(dateToISOString(selectedDate)) : '...'}
+                  
+                  {/* --- CAMBIO 4: Ocultar botón si la fecha es futura --- */}
+                  {!isFutureDate && (
+                    <button 
+                      onClick={() => setIsCatalogOpen(true)}
+                      className={styles.addDayButton}
+                      aria-label="Añadir alimento a este día"
+                    >
+                      <Plus size={18} />
+                      Añadir Alimento
+                    </button>
+                  )}
                 </h3>
                 {selectedDayEntries.length === 0 ? (
                   <p className={styles.emptyDay}>No hay registros para este día.</p>
@@ -295,15 +464,111 @@ export default function Historial() {
                           key={entry.id}
                           entry={entry}
                           food={food}
+                          // --- CAMBIO 5: Deshabilitar props si la fecha es futura ---
+                          onUpdateUnits={!isFutureDate ? handleUpdateUnits : undefined}
+                          onDelete={!isFutureDate ? handleDeleteEntry : undefined}
                         />
                       );
                     })}
                   </div>
                 )}
+                
+                {isFutureDate && (
+                  <p className={styles.emptyDay}>
+                    No puedes registrar alimentos en una fecha futura.
+                  </p>
+                )}
               </div>
             </div>
           </TabsContent>
         </Tabs>
+
+        {/* --- El modal del catálogo (sin cambios) --- */}
+        <Dialog open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
+          <DialogContent className={styles.catalogDialog}>
+            <DialogHeader>
+              <DialogTitle>Añadir a {selectedDate ? formatDateShort(dateToISOString(selectedDate)) : '...'}</DialogTitle>
+            </DialogHeader>
+            
+            <div className={styles.catalogContent}>
+              <div className={styles.catalogHeader}>
+                <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
+                  <DialogTrigger asChild>
+                    <button className={styles.buttonSecondary}>
+                      <Plus size={18} />
+                      Añadir Manual
+                    </button>
+                  </DialogTrigger>
+                  <DialogContent className={styles.manualDialog}>
+                    <DialogHeader>
+                      <DialogTitle>Añadir alimento manual</DialogTitle>
+                    </DialogHeader>
+                    <form onSubmit={handleHistoryAddManual} className={styles.manualForm}>
+                      <div className={styles.manualFormGrid}>
+                        <input
+                          type="text"
+                          value={manualName}
+                          onChange={(e) => setManualName(e.target.value)}
+                          placeholder="Nombre del alimento"
+                          className={styles.input}
+                          required
+                        />
+                        <input
+                          type="number"
+                          value={manualKcal}
+                          onChange={(e) => setManualKcal(e.target.value)}
+                          placeholder="Kcal por unidad"
+                          min="1"
+                          className={styles.input}
+                          required
+                        />
+                        <input
+                          type="number"
+                          value={manualUnits}
+                          onChange={(e) => setManualUnits(e.target.value)}
+                          placeholder="Unidades"
+                          min="1"
+                          className={styles.input}
+                          required
+                        />
+                      </div>
+                      <div className={styles.saveFoodCheckbox}>
+                        <input 
+                          type="checkbox"
+                          id="saveToMyFoodsHistorial"
+                          checked={saveToMyFoods}
+                          onChange={(e) => setSaveToMyFoods(e.target.checked)}
+                        />
+                        <label htmlFor="saveToMyFoodsHistorial">
+                          Guardar en "Mis Alimentos"
+                        </label>
+                      </div>
+                      <button type="submit" className={styles.buttonPrimary}>
+                        Agregar
+                      </button>
+                    </form>
+                  </DialogContent>
+                </Dialog>
+              </div>
+              
+              <div className={styles.filters}>
+                <SearchBar value={searchQuery} onChange={setSearchQuery} />
+                <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
+              </div>
+
+              <div className={styles.foodGrid}>
+                {filteredFoods.length === 0 ? (
+                  <p className={styles.emptyState}>No se encontraron alimentos</p>
+                ) : (
+                  filteredFoods.map(food => (
+                    <FoodCard key={food.id} food={food} onAdd={handleHistoryAddFood} />
+                  ))
+                )}
+              </div>
+            </div>
+          </DialogContent>
+        </Dialog>
+
       </main>
     </div>
   );
