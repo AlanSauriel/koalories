@@ -14,6 +14,7 @@ interface SessionContextType {
   activeProfile: Profile | null;
   setProfiles: SetValue<Profile[]>;
   setActiveProfileId: SetValue<string | null>;
+  updateActiveProfile: (updatedData: Partial<Profile>) => void; // --- FUNCIÓN AÑADIDA ---
   registerProfile: (name: string, password: string) => AuthResult;
   login: (name: string, password: string) => AuthResult;
   deleteProfile: (profileId: string) => void;
@@ -27,6 +28,23 @@ export function SessionProvider({ children }: { children: ReactNode }) {
   const [activeProfileId, setActiveProfileId] = useLocalStorage<string | null>('cc_activeProfileId', null);
 
   const activeProfile = profiles.find(p => p.id === activeProfileId) || null;
+
+  // --- NUEVA FUNCIÓN ---
+  const updateActiveProfile = (updatedData: Partial<Profile>) => {
+    if (!activeProfile) return;
+    
+    // 1. Crea el perfil actualizado
+    const updatedProfile = { ...activeProfile, ...updatedData };
+    
+    // 2. Actualiza la lista completa de perfiles
+    const updatedProfiles = profiles.map(p =>
+      p.id === activeProfile.id ? updatedProfile : p
+    );
+    
+    // 3. Guarda la nueva lista
+    setProfiles(updatedProfiles);
+  };
+  // --- FIN NUEVA FUNCIÓN ---
 
   const registerProfile = (name: string, password: string): AuthResult => {
     const trimmedName = name.trim();
@@ -58,6 +76,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       heightCm: 0,
       activity: 'sedentario',
       tdee: 0,
+      goal: 'maintenance', // --- VALOR POR DEFECTO AÑADIDO ---
       createdAt: new Date().toISOString(),
     };
 
@@ -123,6 +142,7 @@ export function SessionProvider({ children }: { children: ReactNode }) {
       activeProfile,
       setProfiles,
       setActiveProfileId,
+      updateActiveProfile, // --- FUNCIÓN EXPUESTA ---
       registerProfile,
       login,
       deleteProfile,
