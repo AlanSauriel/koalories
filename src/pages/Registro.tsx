@@ -5,18 +5,17 @@ import { useCaloriesCalculator } from '../hooks/useCaloriesCalculator';
 import { ThemeToggle } from '../components/ThemeToggle';
 import { Sex, ActivityLevel } from '../types';
 import { Save } from 'lucide-react';
+import { useToast } from "@/hooks/use-toast"; // --- IMPORTADO ---
 import styles from './Registro.module.css';
 
 export default function Registro() {
   const navigate = useNavigate();
   const { activeProfile, profiles, setProfiles } = useSession();
   const calculateCalories = useCaloriesCalculator();
+  const { toast } = useToast(); // --- INICIALIZADO ---
 
-  // --- 1. MODIFICAR ESTADOS ---
-  // Los estados ahora guardarán un 'string' para permitir campos vacíos ("")
-  // o valores a medio escribir (ej. "70.").
+  // ... (el resto de tus estados se mantiene igual)
   const [sex, setSex] = useState<Sex>(activeProfile?.sex || 'male');
-  
   const [age, setAge] = useState<string>(
     activeProfile?.age ? String(activeProfile.age) : ''
   );
@@ -26,8 +25,8 @@ export default function Registro() {
   const [heightCm, setHeightCm] = useState<string>(
     activeProfile?.heightCm ? String(activeProfile.heightCm) : ''
   );
-  
   const [activity, setActivity] = useState<ActivityLevel>(activeProfile?.activity || 'moderado');
+
 
   useEffect(() => {
     if (!activeProfile) {
@@ -39,15 +38,17 @@ export default function Registro() {
     e.preventDefault();
     if (!activeProfile) return;
 
-    // --- 2. MODIFICAR SUBMIT ---
-    // Convertimos los 'string' a 'number' solo al guardar.
-    // Usamos parseFloat para peso (permite decimales) y Number para el resto.
     const ageNum = Number(age) || 0;
     const weightNum = parseFloat(weightKg) || 0;
     const heightNum = Number(heightCm) || 0;
 
     if (ageNum < 13 || weightNum < 30 || heightNum < 120) {
-      alert("Por favor, ingresa valores válidos para edad (mín. 13), peso (mín. 30) y altura (mín. 120).");
+      // --- CAMBIO: De alert() a toast() ---
+      toast({
+        title: "Datos incompletos",
+        description: "Por favor, ingresa valores válidos para edad (mín. 13), peso (mín. 30) y altura (mín. 120).",
+        variant: "destructive",
+      });
       return;
     }
 
@@ -107,7 +108,6 @@ export default function Registro() {
               </select>
             </div>
 
-            {/* --- 3. MODIFICAR INPUTS --- */}
             <div className={styles.field}>
               <label htmlFor="age">Edad (años)</label>
               <input
@@ -115,9 +115,8 @@ export default function Registro() {
                 type="number"
                 min="13"
                 max="80"
-                value={age} // El valor es el 'string' del estado
+                value={age}
                 placeholder="Ej. 25"
-                // El onChange ahora solo guarda el string
                 onChange={(e) => setAge(e.target.value)}
                 className={styles.input}
                 required
@@ -131,10 +130,9 @@ export default function Registro() {
                 type="number"
                 min="30"
                 max="250"
-                step="0.1" // "step" permite los decimales
-                value={weightKg} // El valor es el 'string' del estado
+                step="0.1"
+                value={weightKg}
                 placeholder="Ej. 70.5"
-                // El onChange ahora solo guarda el string
                 onChange={(e) => setWeightKg(e.target.value)}
                 className={styles.input}
                 required
@@ -148,9 +146,8 @@ export default function Registro() {
                 type="number"
                 min="120"
                 max="220"
-                value={heightCm} // El valor es el 'string' del estado
+                value={heightCm}
                 placeholder="Ej. 175"
-                // El onChange ahora solo guarda el string
                 onChange={(e) => setHeightCm(e.target.value)}
                 className={styles.input}
                 required
