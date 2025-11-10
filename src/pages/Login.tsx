@@ -3,6 +3,17 @@ import { useNavigate } from 'react-router-dom';
 import { Trash2, UserPlus, LogIn } from 'lucide-react';
 import { useSession } from '../context/SessionContext';
 import { ThemeToggle } from '../components/ThemeToggle';
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+  AlertDialogTrigger,
+} from "@/components/ui/alert-dialog"; // --- IMPORTADO ---
 import styles from './Login.module.css';
 
 export default function Login() {
@@ -15,9 +26,7 @@ export default function Login() {
     deleteProfile,
   } = useSession();
 
-  // --- ESTADO AÑADIDO ---
   const [isRegistering, setIsRegistering] = useState(false);
-
   const [loginName, setLoginName] = useState('');
   const [loginPassword, setLoginPassword] = useState('');
   const [loginError, setLoginError] = useState('');
@@ -34,7 +43,6 @@ export default function Login() {
   const registerConfirmId = useId();
 
   useEffect(() => {
-    // If already logged in, redirect to dashboard
     if (activeProfileId && profiles.find(p => p.id === activeProfileId)) {
       navigate('/dashboard');
     }
@@ -43,14 +51,11 @@ export default function Login() {
   const handleLogin = (e: React.FormEvent) => {
     e.preventDefault();
     setLoginError('');
-
     const loginResult = login(loginName, loginPassword);
-
     if (!loginResult.success) {
       setLoginError(loginResult.error);
       return;
     }
-
     setLoginName('');
     setLoginPassword('');
     navigate('/dashboard');
@@ -59,19 +64,15 @@ export default function Login() {
   const handleRegister = (e: React.FormEvent) => {
     e.preventDefault();
     setRegisterError('');
-
     if (registerPassword !== registerConfirm) {
       setRegisterError('Las contraseñas no coinciden');
       return;
     }
-
     const registerResult = registerProfile(registerName, registerPassword);
-
     if (!registerResult.success) {
       setRegisterError(registerResult.error);
       return;
     }
-
     setRegisterName('');
     setRegisterPassword('');
     setRegisterConfirm('');
@@ -79,9 +80,8 @@ export default function Login() {
   };
 
   const handleDeleteProfile = (profileId: string) => {
-    if (confirm('¿Seguro que deseas eliminar este perfil?')) {
-      deleteProfile(profileId);
-    }
+    // --- CAMBIO: La confirmación ahora está en el AlertDialog ---
+    deleteProfile(profileId);
   };
 
   const handleSelectProfile = (profileName: string) => {
@@ -135,7 +135,6 @@ export default function Login() {
         </div>
 
         <div className={styles.cardsGrid}>
-          {/* --- RENDERIZADO CONDICIONAL: MUESTRA LOGIN --- */}
           {!isRegistering ? (
             <section className={`${styles.card} ${styles.loginCard}`}>
               <div className={styles.cardHeader}>
@@ -189,7 +188,6 @@ export default function Login() {
                 </button>
               </form>
 
-              {/* --- BOTÓN DE INTERCAMBIO --- */}
               <p className={styles.helperText}>
                 ¿No tienes un perfil?{' '}
                 <button
@@ -227,14 +225,38 @@ export default function Login() {
                             )}
                           </div>
                         </button>
-                        <button
-                          type="button"
-                          onClick={() => handleDeleteProfile(profile.id)}
-                          className={styles.deleteButton}
-                          aria-label={`Eliminar ${profile.name}`}
-                        >
-                          <Trash2 size={18} />
-                        </button>
+                        
+                        {/* --- CAMBIO: AlertDialog para confirmar borrado --- */}
+                        <AlertDialog>
+                          <AlertDialogTrigger asChild>
+                            <button
+                              type="button"
+                              className={styles.deleteButton}
+                              aria-label={`Eliminar ${profile.name}`}
+                            >
+                              <Trash2 size={18} />
+                            </button>
+                          </AlertDialogTrigger>
+                          <AlertDialogContent>
+                            <AlertDialogHeader>
+                              <AlertDialogTitle>¿Estás seguro?</AlertDialogTitle>
+                              <AlertDialogDescription>
+                                Esta acción no se puede deshacer. Se eliminará permanentemente
+                                el perfil de <strong>{profile.name}</strong> y todos sus datos de consumo.
+                              </AlertDialogDescription>
+                            </AlertDialogHeader>
+                            <AlertDialogFooter>
+                              <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                              <AlertDialogAction
+                                onClick={() => handleDeleteProfile(profile.id)}
+                                className={styles.buttonDanger} // Opcional: estilo de botón de peligro
+                              >
+                                Sí, eliminar perfil
+                              </AlertDialogAction>
+                            </AlertDialogFooter>
+                          </AlertDialogContent>
+                        </AlertDialog>
+
                       </div>
                     );
                   })}
@@ -246,8 +268,6 @@ export default function Login() {
               )}
             </section>
           ) : (
-            
-            /* --- RENDERIZADO CONDICIONAL: MUESTRA REGISTRO --- */
             <section className={`${styles.card} ${styles.registerCard}`}>
               <div className={styles.cardHeader}>
                 <h2>Crear cuenta</h2>
@@ -317,7 +337,6 @@ export default function Login() {
                 Tras crear tu cuenta completaremos tus datos físicos para personalizar las calorías.
               </p>
 
-              {/* --- BOTÓN DE INTERCAMBIO --- */}
               <p className={styles.helperText}>
                 ¿Ya tienes una cuenta?{' '}
                 <button
