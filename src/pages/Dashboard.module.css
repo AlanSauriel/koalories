@@ -61,12 +61,23 @@
   color: white;
 }
 
+.iconButtonDanger {
+  color: var(--danger);
+  border-color: var(--danger);
+}
+
+.iconButtonDanger:hover {
+  background: var(--danger);
+  border-color: var(--danger);
+  color: white;
+}
+
 .dashboardLayout {
   max-width: 1200px;
   margin: 0 auto;
   padding: var(--spacing-xl) var(--spacing-md);
   display: grid;
-  grid-template-columns: 1fr; /* 1 columna por defecto (móvil) */
+  grid-template-columns: 1fr;
   gap: var(--spacing-2xl);
 }
 
@@ -85,37 +96,24 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-2xl);
-  /* Las propiedades 'sticky' y 'overflow' se han quitado de la media query */
 }
 
-.intakeActionsAndForm {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-
-/* --- SECCIÓN DE PROGRESO MODIFICADA --- */
 .progressSection {
   display: flex;
-  flex-direction: column; /* Apila el anillo y el texto */
-  align-items: center;   /* Centra todo */
-  gap: var(--spacing-lg); /* Espacio entre el anillo y el texto */
-  
-  /* Esto es opcional, pero lo hace ver como en tu captura (una tarjeta) */
+  flex-direction: column;
+  align-items: center;
+  gap: var(--spacing-lg);
   background: var(--bg-card);
   padding: var(--spacing-xl);
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
 }
 
-/* --- NUEVAS CLASES PARA TEXTO DINÁMICO --- */
 .progressText {
   text-align: center;
   display: flex;
   flex-direction: column;
   gap: var(--spacing-xs);
-  /* Añadimos altura mínima para evitar saltos de layout */
   min-height: 3.2em; 
 }
 
@@ -132,8 +130,6 @@
   margin: 0;
   font-style: italic;
 }
-/* --- FIN DE NUEVAS CLASES --- */
-
 
 .intakeSection,
 .catalogSection {
@@ -155,7 +151,7 @@
   margin: 0;
 }
 
-.sectionActions {
+.intakeHeaderActions {
   display: flex;
   gap: var(--spacing-sm);
   flex-wrap: wrap;
@@ -166,6 +162,7 @@
 .buttonDanger {
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-lg);
   border-radius: var(--radius-md);
@@ -177,7 +174,7 @@
 
 .buttonPrimary {
   background: var(--gradient-brand);
-  color: white;
+  color: white; /* Color por defecto (modo oscuro) */
 }
 
 .buttonSecondary {
@@ -204,13 +201,16 @@
 }
 
 .manualForm {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  padding-top: var(--spacing-md);
+}
+
+.manualFormGrid {
   display: grid;
   grid-template-columns: 1fr;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
+  gap: var(--spacing-md);
 }
 
 .input {
@@ -254,8 +254,6 @@
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: var(--spacing-md);
 }
-
-/* --- ESTILOS PARA LA SECCIÓN DE OBJETIVOS --- */
 
 .goalSection {
   background: var(--bg-card);
@@ -329,102 +327,10 @@
   color: var(--brand);
 }
 
-
-@media (max-width: 768px) {
-  .headerContent {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .title {
-    font-size: var(--font-size-xl);
-  }
-
-  .headerActions {
-    align-self: flex-end;
-  }
-
-  .manualForm {
-    grid-template-columns: 1fr;
-  }
-
-  .filters {
-    grid-template-columns: 1fr;
-  }
-
-  .sectionHeader {
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .sectionActions {
-    width: 100%;
-    justify-content: stretch;
-  }
-
-  .buttonSecondary,
-  .buttonDanger {
-    flex: 1;
-  }
-  
-  .goalOptions {
-    grid-template-columns: 1fr;
-  }
-}
-
-@media (min-width: 992px) {
-  .dashboardLayout {
-    grid-template-columns: 2fr 1fr;
-    align-items: flex-start;
-  }
-
-  /* --- CAMBIO DE SCROLL --- */
-  /* Se eliminó el bloque .sidebarContent que 
-     contenía position: sticky y overflow-y: auto.
-     Ahora la barra lateral se moverá junto con 
-     el resto de la página. 
-  */
-
-  .manualForm {
-    grid-template-columns: 2fr 1fr 1fr auto;
-  }
-}
-/* ... (pega esto después de tus estilos existentes) ... */
-
-/* --- ESTILOS PARA EL CHECKBOX "GUARDAR ALIMENTO" --- */
-
-.manualForm {
-  display: grid;
-  /* La columna auto se quitó para el botón, 
-     el botón ahora se expande con el grid-column */
-  grid-template-columns: 2fr 1fr 1fr;
-  gap: var(--spacing-sm);
-  padding: var(--spacing-lg);
-  background: var(--bg-card);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
-  
-  /* Hacemos que los inputs y el checkbox ocupen el espacio */
-  grid-template-areas:
-    "name kcal units"
-    "save save save"
-    "submit submit submit";
-}
-
-/* Asignamos las áreas */
-.manualForm input[type="text"] { grid-area: name; }
-.manualForm input[type="number"][placeholder*="Kcal"] { grid-area: kcal; }
-.manualForm input[type="number"][placeholder*="Unidades"] { grid-area: units; }
-.saveFoodCheckbox { grid-area: save; }
-.manualForm .buttonPrimary { grid-area: submit; }
-
-
 .saveFoodCheckbox {
   display: flex;
   align-items: center;
   gap: var(--spacing-sm);
-  margin-top: var(--spacing-xs);
-  margin-bottom: var(--spacing-xs);
 }
 
 .saveFoodCheckbox input[type="checkbox"] {
@@ -441,36 +347,73 @@
   cursor: pointer;
 }
 
-/* ... (tus media queries existentes) ... */
+/* --- 🚀 FIX AÑADIDO AQUÍ --- */
+/* Arreglo para .buttonPrimary en modo claro */
+:global([data-theme="light"]) .buttonPrimary {
+  color: var(--text-primary); /* Texto oscuro */
+  background: var(--bg-secondary); /* Fondo gris claro */
+  border: 1px solid var(--border-color);
+  box-shadow: var(--shadow);
+}
+
+:global([data-theme="light"]) .buttonPrimary:hover {
+  background: var(--bg-card);
+  border-color: var(--brand);
+}
+
+/* Arregla el color del icono (si hay uno) */
+:global([data-theme="light"]) .buttonPrimary svg {
+  stroke: var(--text-primary);
+}
+/* --- FIN DEL FIX --- */
+
 
 @media (max-width: 768px) {
-  /* ... (tus estilos existentes) ... */
-  .manualForm {
+  .headerContent {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+
+  .title {
+    font-size: var(--font-size-xl);
+  }
+
+  .headerActions {
+    align-self: flex-end;
+  }
+
+  .manualFormGrid {
     grid-template-columns: 1fr;
-    /* Reseteamos las áreas para móvil */
-    grid-template-areas:
-      "name"
-      "kcal"
-      "units"
-      "save"
-      "submit";
+    gap: var(--spacing-md);
+  }
+
+  .filters {
+    grid-template-columns: 1fr;
+  }
+
+  .sectionHeader {
+    flex-direction: column;
+    align-items: flex-start;
+  }
+  
+  .intakeHeaderActions {
+    width: 100%;
+    justify-content: flex-start;
+  }
+
+  .buttonSecondary,
+  .buttonDanger {
+    flex: 1;
+  }
+  
+  .goalOptions {
+    grid-template-columns: 1fr;
   }
 }
 
-/* Asegúrate de que esta media query 
-   contenga la regla de .manualForm */
 @media (min-width: 992px) {
   .dashboardLayout {
     grid-template-columns: 2fr 1fr;
     align-items: flex-start;
-  }
-
-  .manualForm {
-    /* Restauramos el grid complejo para escritorio */
-    grid-template-columns: 2fr 1fr 1fr;
-    grid-template-areas:
-      "name kcal units"
-      "save save save"
-      "submit submit submit";
   }
 }
