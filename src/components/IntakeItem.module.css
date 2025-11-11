@@ -7,6 +7,7 @@
   background: var(--bg-secondary);
   border-radius: var(--radius-md);
   border: 1px solid var(--border-color);
+  /* overflow: hidden; --- ESTA LÍNEA FUE ELIMINADA --- */
 }
 
 .info {
@@ -49,6 +50,7 @@
   background: var(--brand);
   border-color: var(--brand);
   color: white;
+  transform: scale(1.1);
 }
 
 .units {
@@ -77,6 +79,7 @@
   background: var(--danger);
   border-color: var(--danger);
   color: white;
+  transform: scale(1.1);
 }
 
 @media (max-width: 640px) {
