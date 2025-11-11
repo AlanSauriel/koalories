@@ -1,6 +1,4 @@
-/* ... (tus estilos .page, .header, .main, etc. existentes) ... */
-/* ... (puedes copiar y pegar todo el archivo para reemplazarlo) ... */
-
+/* ... (el archivo .css que me pasaste, limpiado) ... */
 .page {
   min-height: 100vh;
   background: var(--bg-primary);
@@ -39,6 +37,7 @@
   background: var(--brand);
   border-color: var(--brand);
   color: white;
+  transform: scale(1.05); /* --- AÑADIDO (IDEA 3) --- */
 }
 
 .main {
@@ -65,7 +64,6 @@
   font-size: var(--font-size-lg);
 }
 
-/* --- ESTILOS DE PESTAÑAS (TABS) --- */
 .tabsContainer {
   width: 100%;
 }
@@ -83,16 +81,13 @@
   font-weight: 600;
   color: var(--text-secondary);
   border-bottom: 2px solid transparent;
-  margin-bottom: -1px; /* Para que el borde se alinee con el borde del contenedor */
+  margin-bottom: -1px;
 }
 
-/* shadcn/ui usa data-state="active" */
 .tabsTrigger[data-state="active"] {
   color: var(--brand);
   border-bottom-color: var(--brand);
 }
-/* --- FIN ESTILOS DE PESTAÑAS --- */
-
 
 .emptyState {
   text-align: center;
@@ -146,7 +141,10 @@
 
 .statCard:hover {
   transform: translateY(-2px);
-  box-shadow: var(--shadow-lg);
+  /* --- AÑADIDO (IDEA 3): GLOW --- */
+  box-shadow: 0 0 20px hsla(204, 88%, 52%, 0.15), 
+              var(--shadow-lg);
+  border-color: hsla(204, 88%, 52%, 0.5);
 }
 
 .statIcon {
@@ -213,8 +211,6 @@
   margin-bottom: var(--spacing-xl);
 }
 
-/* --- ESTILOS DE VISTA DE CALENDARIO --- */
-
 .calendarViewContainer {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -227,7 +223,7 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   padding: var(--spacing-sm);
-  align-self: flex-start; /* Evita que el calendario se estire */
+  align-self: flex-start;
 }
 
 .selectedDayDetails {
@@ -235,7 +231,7 @@
   border-radius: var(--radius-lg);
   border: 1px solid var(--border-color);
   padding: var(--spacing-lg);
-  min-height: 400px; /* Para alinear con el calendario */
+  min-height: 400px;
 }
 
 .selectedDayDetails h3 {
@@ -259,54 +255,38 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  max-height: 600px; /* Le damos un scroll si la lista es muy larga */
+  max-height: 600px;
   overflow-y: auto;
   padding-right: var(--spacing-sm);
 }
 
-/* --- FIN ESTILOS DE CALENDARIO --- */
-
-
-/* ... (tus estilos de .table, .stateBadge, etc. pueden quedar aquí si los usas
-       en el futuro, o puedes eliminarlos si solo te quedas con el gráfico) ... */
-
-
 @media (max-width: 992px) {
   .calendarViewContainer {
-    grid-template-columns: 1fr; /* Apila el calendario y la lista en móviles */
+    grid-template-columns: 1fr;
   }
-  
   .calendarWrapper {
-    /* Centra el calendario en móvil si se ve muy pequeño */
     display: flex;
     justify-content: center;
   }
-  
   .selectedDayDetails {
     min-height: auto;
   }
 }
 
-
 @media (max-width: 768px) {
   .statsGrid {
     grid-template-columns: 1fr;
   }
-
   .chartContainer {
     padding: var(--spacing-lg);
   }
-
   .chartTitle {
     font-size: var(--font-size-lg);
   }
-
   .statValue {
     font-size: 28px;
   }
 }
-
-/* --- ESTILOS AÑADIDOS PARA MODAL DE CATÁLOGO --- */
 
 .selectedDayHeader {
   display: flex;
@@ -314,8 +294,6 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-md);
-  
-  /* Hereda estilos de H3 */
   font-size: var(--font-size-lg);
   font-weight: 700;
   color: var(--text-primary);
@@ -326,17 +304,17 @@
 }
 
 .selectedDayHeader > span {
-  flex: 1; /* Permite que el texto crezca */
-  min-width: 150px; /* Evita que el texto se rompa feo */
+  flex: 1;
+  min-width: 150px;
 }
 
 .calendarActions {
   display: flex;
   gap: var(--spacing-sm);
-  flex-shrink: 0; /* Evita que los botones se rompan */
+  flex-shrink: 0;
 }
 
-.addDayButton { /* Se quitó .copyDayButton */
+.addDayButton {
   display: flex;
   align-items: center;
   justify-content: center;
@@ -352,15 +330,23 @@
   transition: var(--transition);
 }
 
-/* Se eliminó .copyDayButton */
+/* --- AÑADIDO (IDEA 3): Transición para el SVG --- */
+.addDayButton svg {
+  transition: transform 0.2s ease-out;
+}
 
-.addDayButton:hover { /* Se quitó .copyDayButton:hover */
+.addDayButton:hover {
   background: var(--brand);
   border-color: var(--brand);
   color: white;
+  transform: scale(1.05); /* --- AÑADIDO (IDEA 3) --- */
 }
 
-/* Clases copiadas de Dashboard.module.css para el modal */
+/* --- AÑADIDO (IDEA 3): Rotación del SVG --- */
+.addDayButton:hover svg {
+  transform: rotate(90deg);
+}
+
 .catalogDialog {
   max-width: 800px;
   max-height: 80vh;
@@ -370,7 +356,6 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  /* Permite scroll si el contenido es mucho */
   max-height: 65vh; 
   overflow-y: auto;
   padding-right: var(--spacing-sm);
@@ -472,7 +457,6 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* Arreglo para modo claro */
 :global([data-theme="light"]) .buttonPrimary {
   color: var(--text-primary);
   background: var(--bg-secondary);
@@ -487,13 +471,11 @@
   stroke: var(--text-primary);
 }
 
-/* Arreglo para que el diálogo manual funcione DENTRO del diálogo de catálogo */
 .manualDialog[data-state="open"],
 .quantityDialog[data-state="open"] {
-  z-index: 60; /* Mayor que el z-index de catalogDialog (50 por defecto) */
+  z-index: 60;
 }
 
-/* Estilos para el modal de Cantidad (Idea 1) */
 .quantityDialog {
   max-width: 450px;
 }
