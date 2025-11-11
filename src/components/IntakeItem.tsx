@@ -1,11 +1,11 @@
 import { IntakeEntry, FoodItem } from '../types';
 import { Trash2, Minus, Plus } from 'lucide-react';
+import { motion } from 'framer-motion'; // --- IMPORTADO ---
 import styles from './IntakeItem.module.css';
 
 interface IntakeItemProps {
   entry: IntakeEntry;
   food?: FoodItem;
-  // --- PROPS HECHAS OPCIONALES ---
   onUpdateUnits?: (id: string, units: number) => void;
   onDelete?: (id: string) => void;
 }
@@ -13,13 +13,24 @@ interface IntakeItemProps {
 export function IntakeItem({ entry, food, onUpdateUnits, onDelete }: IntakeItemProps) {
   const name = food?.name || entry.customName || 'Alimento personalizado';
   const totalKcal = entry.kcalPerUnit * entry.units;
-  // Determinamos si es una entrada personalizada (sin foodId) o un item de catálogo
   const detailText = food?.servingName
     ? `${food.servingName} (${entry.kcalPerUnit} kcal) × ${entry.units}`
     : `${entry.kcalPerUnit} kcal × ${entry.units}`;
 
   return (
-    <div className={styles.item}>
+    // --- DIV CONVERTIDO A MOTION.DIV Y PROPS AÑADIDAS ---
+    <motion.div
+      layout
+      initial={{ opacity: 0, y: -20, height: 0 }}
+      animate={{ opacity: 1, y: 0, height: "auto" }}
+      exit={{ opacity: 0, x: -100, height: 0 }}
+      transition={{
+        opacity: { duration: 0.3 },
+        height: { duration: 0.3, type: "spring", bounce: 0.3, stiffness: 300, damping: 30 },
+        layout: { duration: 0.3, type: "spring", bounce: 0.4 }
+      }}
+      className={styles.item}
+    >
       <div className={styles.info}>
         <h4 className={styles.name}>{name}</h4>
         <p className={styles.detail}>
@@ -27,8 +38,6 @@ export function IntakeItem({ entry, food, onUpdateUnits, onDelete }: IntakeItemP
         </p>
       </div>
 
-      {/* --- RENDERIZADO CONDICIONAL DE BOTONES --- */}
-      {/* Solo se muestran los controles si las funciones existen */}
       {onUpdateUnits && onDelete && (
         <div className={styles.controls}>
           <button
@@ -55,6 +64,6 @@ export function IntakeItem({ entry, food, onUpdateUnits, onDelete }: IntakeItemP
           </button>
         </div>
       )}
-    </div>
+    </motion.div>
   );
 }
