@@ -417,3 +417,20 @@
     align-items: flex-start;
   }
 }
+/* --- ESTILOS AÑADIDOS PARA IDEAS 1 Y 3 --- */
+
+/* Estilos para el modal de Cantidad (Idea 1) y TDEE (Idea 3) */
+.quantityDialog {
+  max-width: 450px;
+}
+
+.quantityForm {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+
+.label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
+}
