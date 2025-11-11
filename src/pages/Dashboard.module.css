@@ -105,10 +105,6 @@
   box-shadow: var(--shadow);
   position: sticky; 
   top: 110px;
-  
-  /* --- CAMBIO: Quitamos el scroll de aquí --- */
-  /* max-height: calc(100vh - 110px - var(--spacing-xl)); --- ELIMINADO --- */
-  /* overflow-y: auto; --- ELIMINADO --- */
 }
 
 .sidebarSeparator {
@@ -144,11 +140,21 @@
   font-style: italic;
 }
 
-.intakeSection,
+.intakeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+}
+
+/* --- CAMBIO: Convertir el catálogo en un contenedor flex --- */
 .catalogSection {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
+  
+  /* --- AÑADIDO: Altura máxima para contener el scroll --- */
+  /* Ajusta este valor si te parece muy alto o muy bajo */
+  max-height: 700px; 
 }
 
 .sectionHeader {
@@ -157,6 +163,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-md);
+  flex-shrink: 0; /* --- AÑADIDO: Evita que se encoja --- */
 }
 
 .sectionHeader h2 {
@@ -246,9 +253,6 @@
   flex-direction: column;
   gap: var(--spacing-md);
   padding-right: var(--spacing-xs);
-  
-  /* --- CAMBIO: Devolvemos el scroll a la lista --- */
-  /* Ajusta este valor si tu sidebar sigue cortándose */
   max-height: 500px; 
   overflow-y: auto;
 }
@@ -266,13 +270,44 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: var(--spacing-md);
+  flex-shrink: 0; /* --- AÑADIDO: Evita que se encoja --- */
 }
 
 .foodGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: var(--spacing-md);
+  
+  /* --- AÑADIDO: Estilos de scroll --- */
+  flex: 1; /* Ocupa el espacio restante */
+  overflow-y: auto; /* El scroll solo para la parrilla */
+  padding-right: var(--spacing-sm); /* Espacio para el scrollbar */
+
+  /* Scrollbar Estético (Firefox) */
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand) transparent;
 }
+
+/* Scrollbar Estético (Chrome, Safari, Edge) */
+.foodGrid::-webkit-scrollbar {
+  width: 8px;
+}
+
+.foodGrid::-webkit-scrollbar-track {
+  background: transparent; /* Fondo transparente */
+}
+
+.foodGrid::-webkit-scrollbar-thumb {
+  background-color: var(--brand);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-primary); /* Borde del color del fondo */
+}
+
+.foodGrid::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
+}
+/* --- FIN DE ESTILOS DE SCROLL --- */
+
 
 .goalSection {
   display: flex;
@@ -422,13 +457,14 @@
 
   .sidebarContent {
     position: static;
-    max-height: none;
-    overflow-y: visible;
   }
-
-  /* En móvil, la lista de intake no tendrá max-height */
-  .intakeList {
+  
+  /* --- AÑADIDO: Desactivamos el scroll interno en móvil --- */
+  .catalogSection {
     max-height: none;
+  }
+  
+  .foodGrid {
     overflow-y: visible;
   }
 }
