@@ -1,3 +1,5 @@
+/* ... (tus estilos .page, .header, .main, etc. existentes) ... */
+/* ... (puedes copiar y pegar todo el archivo para reemplazarlo) ... */
 
 .page {
   min-height: 100vh;
@@ -323,9 +325,21 @@
   padding-bottom: var(--spacing-md);
 }
 
-.addDayButton {
+.selectedDayHeader > span {
+  flex: 1; /* Permite que el texto crezca */
+  min-width: 150px; /* Evita que el texto se rompa feo */
+}
+
+.calendarActions {
+  display: flex;
+  gap: var(--spacing-sm);
+  flex-shrink: 0; /* Evita que los botones se rompan */
+}
+
+.addDayButton { /* Se quitó .copyDayButton */
   display: flex;
   align-items: center;
+  justify-content: center;
   gap: var(--spacing-sm);
   padding: var(--spacing-sm) var(--spacing-lg);
   background: var(--bg-secondary);
@@ -338,7 +352,9 @@
   transition: var(--transition);
 }
 
-.addDayButton:hover {
+/* Se eliminó .copyDayButton */
+
+.addDayButton:hover { /* Se quitó .copyDayButton:hover */
   background: var(--brand);
   border-color: var(--brand);
   color: white;
@@ -472,8 +488,23 @@
 }
 
 /* Arreglo para que el diálogo manual funcione DENTRO del diálogo de catálogo */
-.manualDialog[data-state="open"] {
+.manualDialog[data-state="open"],
+.quantityDialog[data-state="open"] {
   z-index: 60; /* Mayor que el z-index de catalogDialog (50 por defecto) */
+}
+
+/* Estilos para el modal de Cantidad (Idea 1) */
+.quantityDialog {
+  max-width: 450px;
+}
+.quantityForm {
+  display: grid;
+  gap: var(--spacing-sm);
+}
+.label {
+  font-weight: 600;
+  color: var(--text-primary);
+  font-size: var(--font-size-sm);
 }
 
 @media (max-width: 640px) {
@@ -482,5 +513,13 @@
   }
   .foodGrid {
     grid-template-columns: 1fr;
+  }
+  .calendarActions {
+    width: 100%;
+    justify-content: flex-end;
+  }
+  .addDayButton {
+    flex: 1;
+    max-width: 180px;
   }
 }
