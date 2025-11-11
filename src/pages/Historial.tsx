@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../context/SessionContext';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { ArrowLeft, TrendingUp, TrendingDown, Target, Plus } from 'lucide-react';
+import { ArrowLeft, TrendingUp, TrendingDown, Target, Plus } from 'lucide-react'; // Se quitó Copy
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line, ComposedChart, Area } from 'recharts';
 import { getDaysAgo, formatDateShort, dateToISOString } from '../utils/date';
 import { IntakeEntry, FoodItem } from '../types';
@@ -21,10 +21,16 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "../components/ui/dialog";
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { FoodCard } from '../components/FoodCard';
+// Se quitaron Popover y useToast
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
+
 
 interface HistoryPoint {
   date: string;
@@ -32,15 +38,14 @@ interface HistoryPoint {
   goal: number;
 }
 
-// --- CAMBIO 1: Definimos 'today' aquí para deshabilitar el calendario ---
 const today = new Date();
-// Creamos una copia seteada al final del día para comparaciones
-const endOfToday = new Date(today.setHours(23, 59, 59, 999));
+const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
 
 
 export default function Historial() {
   const navigate = useNavigate();
   const { activeProfile } = useSession();
+  // Se quitó useToast
 
   const [viewMode, setViewMode] = useState<'summary' | 'calendar'>('summary');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -65,6 +70,13 @@ export default function Historial() {
   const [manualUnits, setManualUnits] = useState('1');
   const [saveToMyFoods, setSaveToMyFoods] = useState(false);
   
+  const [isQuantityDialogOpen, setIsQuantityDialogOpen] = useState(false);
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [quantity, setQuantity] = useState('1');
+  
+  // --- ESTADO ELIMINADO (COPIAR DÍA) ---
+  // const [isCopyDayOpen, setIsCopyDayOpen] = useState(false);
+
   useEffect(() => {
     if (!activeProfile) {
       navigate('/login');
@@ -176,27 +188,43 @@ export default function Historial() {
     writeEntriesForDate(dateISO, updatedEntries);
   };
 
-  const handleHistoryAddFood = (food: FoodItem) => {
-    if (!selectedDate) return;
+  const handleHistoryAddFood = (food: FoodItem, unitsToAdd: number) => {
+    if (!selectedDate || unitsToAdd <= 0) return;
     const dateISO = dateToISOString(selectedDate);
 
     const existingEntry = selectedDayEntries.find(entry => entry.foodId === food.id);
     
     if (existingEntry) {
-      handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
+      handleUpdateUnits(existingEntry.id, existingEntry.units + unitsToAdd);
     } else {
       const newEntry: IntakeEntry = {
         id: `entry-${Date.now()}`,
         dateISO: dateISO,
         foodId: food.id,
         kcalPerUnit: food.kcalPerServing,
-        units: 1,
+        units: unitsToAdd,
         timestamp: Date.now(),
       };
       const updatedEntries = [newEntry, ...selectedDayEntries];
       setSelectedDayEntries(updatedEntries);
       writeEntriesForDate(dateISO, updatedEntries);
     }
+  };
+
+  const handleHistoryOpenQuantityDialog = (food: FoodItem) => {
+    setSelectedFood(food);
+    setQuantity('1');
+    setIsQuantityDialogOpen(true);
+  };
+
+  const handleHistorySubmitQuantity = () => {
+    if (!selectedFood) return;
+    const units = Number(quantity);
+    if (units > 0) {
+      handleHistoryAddFood(selectedFood, units);
+    }
+    setIsQuantityDialogOpen(false);
+    setSelectedFood(null);
   };
 
   const handleHistoryAddManual = (e: React.FormEvent) => {
@@ -218,17 +246,7 @@ export default function Historial() {
         isCustom: true,
       };
       setCustomFoods(prev => [...prev, newFoodItem]);
-      const newEntry: IntakeEntry = {
-        id: `entry-${Date.now()}`,
-        dateISO: dateISO,
-        foodId: newFoodItem.id,
-        kcalPerUnit: newFoodItem.kcalPerServing,
-        units: units,
-        timestamp: Date.now(),
-      };
-      const updatedEntries = [newEntry, ...selectedDayEntries];
-      setSelectedDayEntries(updatedEntries);
-      writeEntriesForDate(dateISO, updatedEntries);
+      handleHistoryAddFood(newFoodItem, units);
 
     } else {
       const newEntry: IntakeEntry = {
@@ -251,6 +269,8 @@ export default function Historial() {
     setShowAddManual(false); 
   };
 
+  // --- FUNCIÓN ELIMINADA (COPIAR DÍA) ---
+  // const handleHistoryCopyDay = ...
 
   if (!activeProfile) return null;
 
@@ -261,7 +281,6 @@ export default function Historial() {
   const daysOverGoal = summaryData.filter(d => d.kcal > d.goal * 1.05).length;
   const daysUnderGoal = summaryData.filter(d => d.kcal < d.goal * 0.95).length;
 
-  // --- CAMBIO 2: Comprobar si la fecha seleccionada es futura ---
   const isFutureDate = selectedDate ? selectedDate > endOfToday : false;
 
   return (
@@ -315,7 +334,6 @@ export default function Historial() {
                       </p>
                     </div>
                   </div>
-
                   <div className={styles.statCard}>
                     <div className={`${styles.statIcon} ${styles.iconSuccess}`}>
                       <TrendingDown size={24} />
@@ -328,7 +346,6 @@ export default function Historial() {
                       </p>
                     </div>
                   </div>
-
                   <div className={styles.statCard}>
                     <div className={`${styles.statIcon} ${styles.iconWarning}`}>
                       <TrendingUp size={24} />
@@ -431,24 +448,28 @@ export default function Historial() {
                     formatDay: (date) => date.getDate().toString() 
                   }}
                   className={styles.calendar}
-                  // --- CAMBIO 3: Deshabilitar fechas futuras ---
                   disabled={{ after: today }}
                 />
               </div>
               <div className={styles.selectedDayDetails}>
                 <h3 className={styles.selectedDayHeader}>
-                  Consumo del {selectedDate ? formatDateShort(dateToISOString(selectedDate)) : '...'}
+                  <span>
+                    Consumo del {selectedDate ? formatDateShort(dateToISOString(selectedDate)) : '...'}
+                  </span>
                   
-                  {/* --- CAMBIO 4: Ocultar botón si la fecha es futura --- */}
                   {!isFutureDate && (
-                    <button 
-                      onClick={() => setIsCatalogOpen(true)}
-                      className={styles.addDayButton}
-                      aria-label="Añadir alimento a este día"
-                    >
-                      <Plus size={18} />
-                      Añadir Alimento
-                    </button>
+                    <div className={styles.calendarActions}>
+                      {/* --- BOTÓN ELIMINADO (COPIAR DÍA) --- */}
+
+                      <button 
+                        onClick={() => setIsCatalogOpen(true)}
+                        className={styles.addDayButton}
+                        aria-label="Añadir alimento a este día"
+                      >
+                        <Plus size={18} />
+                        Añadir
+                      </button>
+                    </div>
                   )}
                 </h3>
                 {selectedDayEntries.length === 0 ? (
@@ -464,7 +485,6 @@ export default function Historial() {
                           key={entry.id}
                           entry={entry}
                           food={food}
-                          // --- CAMBIO 5: Deshabilitar props si la fecha es futura ---
                           onUpdateUnits={!isFutureDate ? handleUpdateUnits : undefined}
                           onDelete={!isFutureDate ? handleDeleteEntry : undefined}
                         />
@@ -483,7 +503,7 @@ export default function Historial() {
           </TabsContent>
         </Tabs>
 
-        {/* --- El modal del catálogo (sin cambios) --- */}
+        {/* --- MODAL DEL CATÁLOGO --- */}
         <Dialog open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
           <DialogContent className={styles.catalogDialog}>
             <DialogHeader>
@@ -505,47 +525,15 @@ export default function Historial() {
                     </DialogHeader>
                     <form onSubmit={handleHistoryAddManual} className={styles.manualForm}>
                       <div className={styles.manualFormGrid}>
-                        <input
-                          type="text"
-                          value={manualName}
-                          onChange={(e) => setManualName(e.target.value)}
-                          placeholder="Nombre del alimento"
-                          className={styles.input}
-                          required
-                        />
-                        <input
-                          type="number"
-                          value={manualKcal}
-                          onChange={(e) => setManualKcal(e.target.value)}
-                          placeholder="Kcal por unidad"
-                          min="1"
-                          className={styles.input}
-                          required
-                        />
-                        <input
-                          type="number"
-                          value={manualUnits}
-                          onChange={(e) => setManualUnits(e.target.value)}
-                          placeholder="Unidades"
-                          min="1"
-                          className={styles.input}
-                          required
-                        />
+                        <input type="text" value={manualName} onChange={(e) => setManualName(e.target.value)} placeholder="Nombre del alimento" className={styles.input} required />
+                        <input type="number" value={manualKcal} onChange={(e) => setManualKcal(e.target.value)} placeholder="Kcal por unidad" min="1" className={styles.input} required />
+                        <input type="number" value={manualUnits} onChange={(e) => setManualUnits(e.target.value)} placeholder="Unidades" min="1" className={styles.input} required />
                       </div>
                       <div className={styles.saveFoodCheckbox}>
-                        <input 
-                          type="checkbox"
-                          id="saveToMyFoodsHistorial"
-                          checked={saveToMyFoods}
-                          onChange={(e) => setSaveToMyFoods(e.target.checked)}
-                        />
-                        <label htmlFor="saveToMyFoodsHistorial">
-                          Guardar en "Mis Alimentos"
-                        </label>
+                        <input type="checkbox" id="saveToMyFoodsHistorial" checked={saveToMyFoods} onChange={(e) => setSaveToMyFoods(e.target.checked)} />
+                        <label htmlFor="saveToMyFoodsHistorial">Guardar en "Mis Alimentos"</label>
                       </div>
-                      <button type="submit" className={styles.buttonPrimary}>
-                        Agregar
-                      </button>
+                      <button type="submit" className={styles.buttonPrimary}>Agregar</button>
                     </form>
                   </DialogContent>
                 </Dialog>
@@ -561,11 +549,51 @@ export default function Historial() {
                   <p className={styles.emptyState}>No se encontraron alimentos</p>
                 ) : (
                   filteredFoods.map(food => (
-                    <FoodCard key={food.id} food={food} onAdd={handleHistoryAddFood} />
+                    <FoodCard 
+                      key={food.id} 
+                      food={food} 
+                      onAdd={handleHistoryOpenQuantityDialog} 
+                    />
                   ))
                 )}
               </div>
             </div>
+          </DialogContent>
+        </Dialog>
+        
+        {/* --- MODAL (IDEA 1) --- */}
+        <Dialog open={isQuantityDialogOpen} onOpenChange={setIsQuantityDialogOpen}>
+          <DialogContent className={styles.quantityDialog}>
+            <DialogHeader>
+              <DialogTitle>Añadir {selectedFood?.name}</DialogTitle>
+              <DialogDescription>
+                {selectedFood?.servingName} ({selectedFood?.kcalPerServing} kcal c/u)
+              </DialogDescription>
+            </DialogHeader>
+            <div className={styles.quantityForm}>
+              <label htmlFor="quantity-hist" className={styles.label}>
+                Cantidad
+              </label>
+              <Input
+                id="quantity-hist"
+                type="number"
+                value={quantity}
+                onChange={(e) => setQuantity(e.target.value)}
+                min="1"
+                className={styles.input}
+                autoFocus
+                onKeyDown={(e) => {
+                  if (e.key === 'Enter') {
+                    handleHistorySubmitQuantity();
+                    e.preventDefault();
+                  }
+                }}
+              />
+            </div>
+            <DialogFooter>
+              <Button variant="outline" onClick={() => setIsQuantityDialogOpen(false)}>Cancelar</Button>
+              <Button onClick={handleHistorySubmitQuantity}>Agregar {quantity}</Button>
+            </DialogFooter>
           </DialogContent>
         </Dialog>
 
