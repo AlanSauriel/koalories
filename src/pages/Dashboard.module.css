@@ -103,8 +103,9 @@
   border-radius: var(--radius-lg);
   padding: var(--spacing-lg);
   box-shadow: var(--shadow);
-  position: sticky; 
-  top: 110px;
+  
+  /* --- CAMBIO: Se eliminó position: sticky y max-height --- */
+  /* La tarjeta del sidebar ahora tendrá altura automática */
 }
 
 .sidebarSeparator {
@@ -116,6 +117,7 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-lg);
+  flex-shrink: 0;
 }
 
 .progressText {
@@ -140,22 +142,22 @@
   font-style: italic;
 }
 
-.intakeSection {
-  display: flex;
-  flex-direction: column;
-  gap: var(--spacing-lg);
-}
-
-/* --- CAMBIO: Convertir el catálogo en un contenedor flex --- */
 .catalogSection {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-lg);
-  
-  /* --- AÑADIDO: Altura máxima para contener el scroll --- */
-  /* Ajusta este valor si te parece muy alto o muy bajo */
-  max-height: 700px; 
+
+  /* --- CAMBIO: Se eliminó position: sticky y max-height --- */
 }
+
+.intakeSection {
+  display: flex;
+  flex-direction: column;
+  gap: var(--spacing-lg);
+  /* --- CAMBIO: Se eliminó flex: 1 y min-height --- */
+  /* La sección ahora se ajustará a su contenido (la lista) */
+}
+
 
 .sectionHeader {
   display: flex;
@@ -163,7 +165,7 @@
   align-items: center;
   flex-wrap: wrap;
   gap: var(--spacing-md);
-  flex-shrink: 0; /* --- AÑADIDO: Evita que se encoja --- */
+  flex-shrink: 0;
 }
 
 .sectionHeader h2 {
@@ -253,8 +255,29 @@
   flex-direction: column;
   gap: var(--spacing-md);
   padding-right: var(--spacing-xs);
-  max-height: 500px; 
+  /* --- CAMBIO: Se eliminó flex: 1 --- */
   overflow-y: auto;
+  scrollbar-width: thin;
+  scrollbar-color: var(--brand) transparent;
+  
+  /* --- CAMBIO: Altura máxima pequeña, como pediste --- */
+  /* Esto mostrará aprox. 2.5 items antes de scrollear */
+  max-height: 18rem; 
+}
+
+.intakeList::-webkit-scrollbar {
+  width: 8px;
+}
+.intakeList::-webkit-scrollbar-track {
+  background: transparent;
+}
+.intakeList::-webkit-scrollbar-thumb {
+  background-color: var(--brand);
+  border-radius: var(--radius-full);
+  border: 2px solid var(--bg-card);
+}
+.intakeList::-webkit-scrollbar-thumb:hover {
+  background-color: var(--accent);
 }
 
 .emptyState {
@@ -270,49 +293,47 @@
   display: grid;
   grid-template-columns: 2fr 1fr;
   gap: var(--spacing-md);
-  flex-shrink: 0; /* --- AÑADIDO: Evita que se encoja --- */
+  flex-shrink: 0;
 }
 
 .foodGrid {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
   gap: var(--spacing-md);
-  
-  /* --- AÑADIDO: Estilos de scroll --- */
-  flex: 1; /* Ocupa el espacio restante */
-  overflow-y: auto; /* El scroll solo para la parrilla */
-  padding-right: var(--spacing-sm); /* Espacio para el scrollbar */
-
-  /* Scrollbar Estético (Firefox) */
+  /* --- CAMBIO: Se eliminó flex: 1 --- */
+  overflow-y: auto;
+  padding-right: var(--spacing-sm);
   scrollbar-width: thin;
   scrollbar-color: var(--brand) transparent;
+
+  /* --- CAMBIO: Altura máxima razonable --- */
+  max-height: 45rem; /* Aprox 720px */
 }
 
-/* Scrollbar Estético (Chrome, Safari, Edge) */
 .foodGrid::-webkit-scrollbar {
   width: 8px;
 }
 
 .foodGrid::-webkit-scrollbar-track {
-  background: transparent; /* Fondo transparente */
+  background: transparent;
 }
 
 .foodGrid::-webkit-scrollbar-thumb {
   background-color: var(--brand);
   border-radius: var(--radius-full);
-  border: 2px solid var(--bg-primary); /* Borde del color del fondo */
+  border: 2px solid var(--bg-primary);
 }
 
 .foodGrid::-webkit-scrollbar-thumb:hover {
   background-color: var(--accent);
 }
-/* --- FIN DE ESTILOS DE SCROLL --- */
 
 
 .goalSection {
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  flex-shrink: 0;
 }
 
 .goalTitle {
@@ -455,16 +476,16 @@
     grid-template-columns: 1fr;
   }
 
-  .sidebarContent {
-    position: static;
-  }
-  
-  /* --- AÑADIDO: Desactivamos el scroll interno en móvil --- */
+  .sidebarContent,
   .catalogSection {
+    position: static;
     max-height: none;
+    overflow-y: visible;
   }
-  
+
+  .intakeList,
   .foodGrid {
+    max-height: none;
     overflow-y: visible;
   }
 }
@@ -472,6 +493,7 @@
 @media (min-width: 992px) {
   .dashboardLayout {
     grid-template-columns: 2fr 1fr;
+    /* --- CAMBIO: Devolvemos a flex-start para que las columnas no se estiren --- */
     align-items: flex-start;
   }
 }
