@@ -12,7 +12,10 @@
 
 .card:hover {
   border-color: var(--brand);
-  box-shadow: var(--shadow);
+  transform: translateY(-4px); /* --- CAMBIADO (IDEA 3) --- */
+  /* --- AÑADIDO (IDEA 3): GLOW --- */
+  box-shadow: 0 0 15px hsla(204, 88%, 52%, 0.2), 
+              var(--shadow);
 }
 
 .info {
@@ -44,13 +47,13 @@
   justify-content: center;
   width: 40px;
   height: 40px;
-  background: var(--gradient-brand); /* Estilo para modo oscuro */
-  color: white; /* Color de ícono para modo oscuro */
+  background: var(--gradient-brand);
+  color: white;
   border-radius: var(--radius-full);
   cursor: pointer;
   transition: var(--transition);
   flex-shrink: 0;
-  border: none; /* Asegura que no haya borde en modo oscuro */
+  border: none;
 }
 
 .addButton:hover {
@@ -62,13 +65,10 @@
   transform: scale(0.95);
 }
 
-/* FIX: Sobreescribe el botón en modo claro para que sea visible
-  (Usando el "gris" que pediste, similar al fix de Registro.module.css)
-*/
 :global([data-theme="light"]) .addButton {
-  background: var(--bg-secondary); /* Fondo gris claro */
-  border: 1px solid var(--border-color); /* Borde claro */
-  color: var(--text-primary); /* Color de ícono oscuro */
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  color: var(--text-primary);
   box-shadow: var(--shadow);
 }
 
@@ -78,9 +78,12 @@
   box-shadow: var(--shadow-lg);
 }
 
-/* FIX: Asegura que el ícono SVG (Plus) herede 
-  correctamente el 'color' del botón en ambos modos.
-*/
 .addButton svg {
   stroke: currentColor;
+  transition: transform 0.2s ease-out; /* --- AÑADIDO (IDEA 3) --- */
+}
+
+/* --- AÑADIDO (IDEA 3): Rotación del SVG --- */
+.addButton:hover svg {
+  transform: rotate(90deg);
 }
