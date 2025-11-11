@@ -35,8 +35,8 @@ import {
 import { useToast } from "@/hooks/use-toast";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
-import { Separator } from "@/components/ui/separator"; // --- IMPORTADO (IDEA 2) ---
-import { AnimatePresence } from 'framer-motion'; // --- IMPORTADO (IDEA 1) ---
+import { Separator } from "@/components/ui/separator";
+import { AnimatePresence } from 'framer-motion';
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -312,7 +312,6 @@ export default function Dashboard() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        {/* ... (el JSX del header es igual) ... */}
         <div className={styles.headerContent}>
           <div>
             <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
@@ -335,12 +334,120 @@ export default function Dashboard() {
 
       <div className={styles.dashboardLayout}>
         
+        {/* SIDEBAR - Aparece primero en móvil */}
+        <aside className={styles.sidebar}>
+          <div className={styles.sidebarContent}>
+            
+            <section className={styles.goalSection}>
+              <h3 className={styles.goalTitle}>🎯 Tu Objetivo</h3>
+              <div className={styles.goalOptions}>
+                <button
+                  className={`${styles.goalButton} ${activeProfile.goal === 'deficit' ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('deficit')}
+                  aria-pressed={activeProfile.goal === 'deficit'}
+                >
+                  Perder Peso
+                  <span>(Déficit ~500 kcal)</span>
+                </button>
+                <button
+                  className={`${styles.goalButton} ${(!activeProfile.goal || activeProfile.goal === 'maintenance') ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('maintenance')}
+                  aria-pressed={!activeProfile.goal || activeProfile.goal === 'maintenance'}
+                >
+                  Mantener
+                  <span>(TDEE)</span>
+                </button>
+                <button
+                  className={`${styles.goalButton} ${activeProfile.goal === 'surplus' ? styles.goalButtonActive : ''}`}
+                  onClick={() => handleGoalChange('surplus')}
+                  aria-pressed={activeProfile.goal === 'surplus'}
+                >
+                  Ganar Peso
+                  <span>(Superávit ~300 kcal)</span>
+                </button>
+              </div>
+            </section>
+
+            <section className={styles.progressSection}>
+              <ProgressRing 
+                consumed={totalConsumed} 
+                goal={targetKcal} 
+              />
+              <div className={styles.progressText}>
+                <p className={styles.remainingText}>{remainingText}</p>
+                <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
+              </div>
+            </section>
+
+            <section className={styles.intakeSection}>
+              
+              <div className={styles.sectionHeader}>
+                <h2>Consumo de hoy</h2>
+                <div className={styles.intakeHeaderActions}>
+                  <button onClick={handleExport} className={styles.iconButton} aria-label="Exportar PDF">
+                    <Download size={18} />
+                  </button>
+                  {intakeEntries.length > 0 && (
+                    <AlertDialog>
+                      <AlertDialogTrigger asChild>
+                        <button className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
+                          <RotateCcw size={18} />
+                        </button>
+                      </AlertDialogTrigger>
+                      <AlertDialogContent>
+                        <AlertDialogHeader>
+                          <AlertDialogTitle>¿Reiniciar el día?</AlertDialogTitle>
+                          <AlertDialogDescription>
+                            Esta acción eliminará todos los alimentos que has registrado hoy.
+                            No se puede deshacer.
+                          </AlertDialogDescription>
+                        </AlertDialogHeader>
+                        <AlertDialogFooter>
+                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
+                          <AlertDialogAction onClick={handleReset} className={styles.buttonDanger}>
+                            Sí, reiniciar
+                          </AlertDialogAction>
+                        </AlertDialogFooter>
+                      </AlertDialogContent>
+                    </AlertDialog>
+                  )}
+                </div>
+              </div>
+
+              {intakeEntries.length === 0 ? (
+                <p className={styles.emptyState}>
+                  Aún no registras alimentos. Busca "manzana" o "arroz" para empezar.
+                </p>
+              ) : (
+                <div className={styles.intakeList}>
+                  <AnimatePresence>
+                    {intakeEntries.map(entry => {
+                      const food = entry.foodId 
+                        ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
+                        : undefined;
+                      return (
+                        <IntakeItem
+                          key={entry.id}
+                          entry={entry}
+                          food={food}
+                          onUpdateUnits={handleUpdateUnits}
+                          onDelete={handleDeleteEntry}
+                        />
+                      );
+                    })}
+                  </AnimatePresence>
+                </div>
+              )}
+            </section>
+          </div>
+        </aside>
+
+        {/* MAIN CONTENT - Aparece segundo en móvil */}
         <main className={styles.mainContent}>
           <section className={styles.catalogSection}>
             
             <div className={styles.sectionHeader}>
               <h2>Catálogo de alimentos</h2>
-              {/* ... (el JSX del Dialog 'Añadir Manual' es igual) ... */}
               <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
                 <DialogTrigger asChild>
                   <button className={styles.buttonSecondary}>
@@ -423,124 +530,10 @@ export default function Dashboard() {
           </section>
         </main>
 
-        <aside className={styles.sidebar}>
-          {/* --- CAMBIO (IDEA 2): SIDEBAR UNIFICADO --- */}
-          <div className={styles.sidebarContent}>
-            
-            <section className={styles.goalSection}>
-              <h3 className={styles.goalTitle}>🎯 Tu Objetivo</h3>
-              <div className={styles.goalOptions}>
-                <button
-                  className={`${styles.goalButton} ${activeProfile.goal === 'deficit' ? styles.goalButtonActive : ''}`}
-                  onClick={() => handleGoalChange('deficit')}
-                  aria-pressed={activeProfile.goal === 'deficit'}
-                >
-                  Perder Peso
-                  <span>(Déficit ~500 kcal)</span>
-                </button>
-                <button
-                  className={`${styles.goalButton} ${(!activeProfile.goal || activeProfile.goal === 'maintenance') ? styles.goalButtonActive : ''}`}
-                  onClick={() => handleGoalChange('maintenance')}
-                  aria-pressed={!activeProfile.goal || activeProfile.goal === 'maintenance'}
-                >
-                  Mantener
-                  <span>(TDEE)</span>
-                </button>
-                <button
-                  className={`${styles.goalButton} ${activeProfile.goal === 'surplus' ? styles.goalButtonActive : ''}`}
-                  onClick={() => handleGoalChange('surplus')}
-                  aria-pressed={activeProfile.goal === 'surplus'}
-                >
-                  Ganar Peso
-                  <span>(Superávit ~300 kcal)</span>
-                </button>
-              </div>
-            </section>
-            
-            <Separator className={styles.sidebarSeparator} />
-
-            <section className={styles.progressSection}>
-              <ProgressRing 
-                consumed={totalConsumed} 
-                goal={targetKcal} 
-              />
-              <div className={styles.progressText}>
-                <p className={styles.remainingText}>{remainingText}</p>
-                <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
-              </div>
-            </section>
-            
-            <Separator className={styles.sidebarSeparator} />
-
-            <section className={styles.intakeSection}>
-              
-              <div className={styles.sectionHeader}>
-                <h2>Consumo de hoy</h2>
-                <div className={styles.intakeHeaderActions}>
-                  <button onClick={handleExport} className={styles.iconButton} aria-label="Exportar PDF">
-                    <Download size={18} />
-                  </button>
-                  {intakeEntries.length > 0 && (
-                    <AlertDialog>
-                      <AlertDialogTrigger asChild>
-                        <button className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
-                          <RotateCcw size={18} />
-                        </button>
-                      </AlertDialogTrigger>
-                      <AlertDialogContent>
-                        <AlertDialogHeader>
-                          <AlertDialogTitle>¿Reiniciar el día?</AlertDialogTitle>
-                          <AlertDialogDescription>
-                            Esta acción eliminará todos los alimentos que has registrado hoy.
-                            No se puede deshacer.
-                          </AlertDialogDescription>
-                        </AlertDialogHeader>
-                        <AlertDialogFooter>
-                          <AlertDialogCancel>Cancelar</AlertDialogCancel>
-                          <AlertDialogAction onClick={handleReset} className={styles.buttonDanger}>
-                            Sí, reiniciar
-                          </AlertDialogAction>
-                        </AlertDialogFooter>
-                      </AlertDialogContent>
-                    </AlertDialog>
-                  )}
-                </div>
-              </div>
-
-              {intakeEntries.length === 0 ? (
-                <p className={styles.emptyState}>
-                  Aún no registras alimentos. Busca "manzana" o "arroz" para empezar.
-                </p>
-              ) : (
-                <div className={styles.intakeList}>
-                  {/* --- CAMBIO (IDEA 1): ANIMACIÓN DE LISTA --- */}
-                  <AnimatePresence>
-                    {intakeEntries.map(entry => {
-                      const food = entry.foodId 
-                        ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
-                        : undefined;
-                      return (
-                        <IntakeItem
-                          key={entry.id}
-                          entry={entry}
-                          food={food}
-                          onUpdateUnits={handleUpdateUnits}
-                          onDelete={handleDeleteEntry}
-                        />
-                      );
-                    })}
-                  </AnimatePresence>
-                </div>
-              )}
-            </section>
-          </div>
-          {/* --- FIN CAMBIO (IDEA 2) --- */}
-        </aside>
       </div>
 
-      {/* --- MODAL (IDEA 1) --- */}
+      {/* MODAL DE CANTIDAD */}
       <Dialog open={isQuantityDialogOpen} onOpenChange={setIsQuantityDialogOpen}>
-        {/* ... (el JSX del Dialog 'Cantidad' es igual) ... */}
         <DialogContent className={styles.quantityDialog}>
           <DialogHeader>
             <DialogTitle>Añadir {selectedFood?.name}</DialogTitle>
@@ -570,15 +563,13 @@ export default function Dashboard() {
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={() => setIsQuantityDialogOpen(false)}>Cancelar</Button>
-            <Button onClick={handleSubmitQuantity}>Agregar {quantity}
-            </Button>
+            <Button onClick={handleSubmitQuantity}>Agregar {quantity}</Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>
       
-      {/* --- MODAL (IDEA 3) --- */}
+      {/* MODAL DE BIENVENIDA TDEE */}
       <Dialog open={isTdeeModalOpen}>
-        {/* ... (el JSX del Dialog 'TDEE' es igual) ... */}
         <DialogContent 
           className={styles.quantityDialog}
           onInteractOutside={(e) => e.preventDefault()}
