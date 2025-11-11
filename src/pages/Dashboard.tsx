@@ -9,8 +9,8 @@ import { IntakeItem } from '../components/IntakeItem';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { FoodItem, IntakeEntry, Goal } from '../types'; 
-import { getCurrentDateISO } from '../utils/date'; // Se quitó dateToISOString
-import { LogOut, Plus, RotateCcw, BarChart3, Download } from 'lucide-react'; // Se quitó Copy
+import { getCurrentDateISO } from '../utils/date';
+import { LogOut, Plus, RotateCcw, BarChart3, Download } from 'lucide-react';
 import { exportToPDF } from '../utils/pdf'; 
 import {
   Dialog,
@@ -33,9 +33,10 @@ import {
   AlertDialogTrigger,
 } from "@/components/ui/alert-dialog";
 import { useToast } from "@/hooks/use-toast";
-// Se quitaron Popover y Calendar
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { Separator } from "@/components/ui/separator"; // --- IMPORTADO (IDEA 2) ---
+import { AnimatePresence } from 'framer-motion'; // --- IMPORTADO (IDEA 1) ---
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -46,7 +47,6 @@ const GOAL_ADJUSTMENTS: Record<Goal, number> = {
 };
 
 const today = getCurrentDateISO();
-// Se quitó todayDate
 
 export default function Dashboard() {
   const navigate = useNavigate();
@@ -61,15 +61,10 @@ export default function Dashboard() {
   const [manualUnits, setManualUnits] = useState('1');
   const [saveToMyFoods, setSaveToMyFoods] = useState(false);
 
-  // --- ESTADOS PARA IDEA 1 (CANTIDAD) ---
   const [isQuantityDialogOpen, setIsQuantityDialogOpen] = useState(false);
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [quantity, setQuantity] = useState('1');
 
-  // --- ESTADO ELIMINADO (COPIAR DÍA) ---
-  // const [isCopyDayOpen, setIsCopyDayOpen] = useState(false);
-
-  // --- ESTADO PARA IDEA 3 (ONBOARDING TDEE) ---
   const [isTdeeModalOpen, setIsTdeeModalOpen] = useState(false);
 
   const intakeKey = activeProfile ? `cc_intake_${activeProfile.id}_${today}` : '';
@@ -84,7 +79,6 @@ export default function Dashboard() {
       navigate('/login');
       return;
     }
-    // --- LÓGICA ONBOARDING TDEE (IDEA 3) ---
     if (activeProfile.tdee === 0) {
       setIsTdeeModalOpen(true);
     }
@@ -313,14 +307,12 @@ export default function Dashboard() {
     }
   };
 
-  // --- FUNCIÓN ELIMINADA (COPIAR DÍA) ---
-  // const handleCopyDay = ...
-
   if (!activeProfile) return null;
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
+        {/* ... (el JSX del header es igual) ... */}
         <div className={styles.headerContent}>
           <div>
             <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
@@ -348,6 +340,7 @@ export default function Dashboard() {
             
             <div className={styles.sectionHeader}>
               <h2>Catálogo de alimentos</h2>
+              {/* ... (el JSX del Dialog 'Añadir Manual' es igual) ... */}
               <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
                 <DialogTrigger asChild>
                   <button className={styles.buttonSecondary}>
@@ -431,6 +424,7 @@ export default function Dashboard() {
         </main>
 
         <aside className={styles.sidebar}>
+          {/* --- CAMBIO (IDEA 2): SIDEBAR UNIFICADO --- */}
           <div className={styles.sidebarContent}>
             
             <section className={styles.goalSection}>
@@ -463,6 +457,8 @@ export default function Dashboard() {
               </div>
             </section>
             
+            <Separator className={styles.sidebarSeparator} />
+
             <section className={styles.progressSection}>
               <ProgressRing 
                 consumed={totalConsumed} 
@@ -473,16 +469,14 @@ export default function Dashboard() {
                 <p className={styles.motivationalPhrase}>{motivationalPhrase}</p>
               </div>
             </section>
-
+            
+            <Separator className={styles.sidebarSeparator} />
 
             <section className={styles.intakeSection}>
               
               <div className={styles.sectionHeader}>
                 <h2>Consumo de hoy</h2>
                 <div className={styles.intakeHeaderActions}>
-                  
-                  {/* --- BOTÓN ELIMINADO (COPIAR DÍA) --- */}
-
                   <button onClick={handleExport} className={styles.iconButton} aria-label="Exportar PDF">
                     <Download size={18} />
                   </button>
@@ -519,29 +513,34 @@ export default function Dashboard() {
                 </p>
               ) : (
                 <div className={styles.intakeList}>
-                  {intakeEntries.map(entry => {
-                    const food = entry.foodId 
-                      ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
-                      : undefined;
-                    return (
-                      <IntakeItem
-                        key={entry.id}
-                        entry={entry}
-                        food={food}
-                        onUpdateUnits={handleUpdateUnits}
-                        onDelete={handleDeleteEntry}
-                      />
-                    );
-                  })}
+                  {/* --- CAMBIO (IDEA 1): ANIMACIÓN DE LISTA --- */}
+                  <AnimatePresence>
+                    {intakeEntries.map(entry => {
+                      const food = entry.foodId 
+                        ? [...foodsData, ...customFoods].find(f => f.id === entry.foodId) 
+                        : undefined;
+                      return (
+                        <IntakeItem
+                          key={entry.id}
+                          entry={entry}
+                          food={food}
+                          onUpdateUnits={handleUpdateUnits}
+                          onDelete={handleDeleteEntry}
+                        />
+                      );
+                    })}
+                  </AnimatePresence>
                 </div>
               )}
             </section>
           </div>
+          {/* --- FIN CAMBIO (IDEA 2) --- */}
         </aside>
       </div>
 
       {/* --- MODAL (IDEA 1) --- */}
       <Dialog open={isQuantityDialogOpen} onOpenChange={setIsQuantityDialogOpen}>
+        {/* ... (el JSX del Dialog 'Cantidad' es igual) ... */}
         <DialogContent className={styles.quantityDialog}>
           <DialogHeader>
             <DialogTitle>Añadir {selectedFood?.name}</DialogTitle>
@@ -579,6 +578,7 @@ export default function Dashboard() {
       
       {/* --- MODAL (IDEA 3) --- */}
       <Dialog open={isTdeeModalOpen}>
+        {/* ... (el JSX del Dialog 'TDEE' es igual) ... */}
         <DialogContent 
           className={styles.quantityDialog}
           onInteractOutside={(e) => e.preventDefault()}
