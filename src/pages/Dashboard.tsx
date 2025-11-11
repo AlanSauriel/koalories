@@ -9,8 +9,8 @@ import { IntakeItem } from '../components/IntakeItem';
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { FoodItem, IntakeEntry, Goal } from '../types'; 
-import { getCurrentDateISO } from '../utils/date';
-import { LogOut, Plus, RotateCcw, BarChart3, Download } from 'lucide-react';
+import { getCurrentDateISO } from '../utils/date'; // Se quitó dateToISOString
+import { LogOut, Plus, RotateCcw, BarChart3, Download } from 'lucide-react'; // Se quitó Copy
 import { exportToPDF } from '../utils/pdf'; 
 import {
   Dialog,
@@ -18,6 +18,8 @@ import {
   DialogHeader,
   DialogTitle,
   DialogTrigger,
+  DialogDescription,
+  DialogFooter,
 } from "../components/ui/dialog"; 
 import {
   AlertDialog,
@@ -29,8 +31,11 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
   AlertDialogTrigger,
-} from "@/components/ui/alert-dialog"; // --- IMPORTADO ---
-import { useToast } from "@/hooks/use-toast"; // --- IMPORTADO ---
+} from "@/components/ui/alert-dialog";
+import { useToast } from "@/hooks/use-toast";
+// Se quitaron Popover y Calendar
+import { Input } from "@/components/ui/input";
+import { Button } from "@/components/ui/button";
 import foodsData from '../data/foods.seed.json';
 import styles from './Dashboard.module.css';
 
@@ -40,10 +45,13 @@ const GOAL_ADJUSTMENTS: Record<Goal, number> = {
   surplus: 300,
 };
 
+const today = getCurrentDateISO();
+// Se quitó todayDate
+
 export default function Dashboard() {
   const navigate = useNavigate();
   const { activeProfile, logout, updateActiveProfile } = useSession(); 
-  const { toast } = useToast(); // --- INICIALIZADO ---
+  const { toast } = useToast(); 
   
   const [searchQuery, setSearchQuery] = useState('');
   const [selectedCategory, setSelectedCategory] = useState('Todas');
@@ -53,7 +61,17 @@ export default function Dashboard() {
   const [manualUnits, setManualUnits] = useState('1');
   const [saveToMyFoods, setSaveToMyFoods] = useState(false);
 
-  const today = getCurrentDateISO();
+  // --- ESTADOS PARA IDEA 1 (CANTIDAD) ---
+  const [isQuantityDialogOpen, setIsQuantityDialogOpen] = useState(false);
+  const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
+  const [quantity, setQuantity] = useState('1');
+
+  // --- ESTADO ELIMINADO (COPIAR DÍA) ---
+  // const [isCopyDayOpen, setIsCopyDayOpen] = useState(false);
+
+  // --- ESTADO PARA IDEA 3 (ONBOARDING TDEE) ---
+  const [isTdeeModalOpen, setIsTdeeModalOpen] = useState(false);
+
   const intakeKey = activeProfile ? `cc_intake_${activeProfile.id}_${today}` : '';
   const customFoodsKey = activeProfile ? `cc_customFoods_${activeProfile.id}` : '';
   
@@ -66,6 +84,10 @@ export default function Dashboard() {
       navigate('/login');
       return;
     }
+    // --- LÓGICA ONBOARDING TDEE (IDEA 3) ---
+    if (activeProfile.tdee === 0) {
+      setIsTdeeModalOpen(true);
+    }
   }, [activeProfile, navigate]);
 
   useEffect(() => {
@@ -73,7 +95,6 @@ export default function Dashboard() {
   }, [setFoodsCache]);
 
   const filteredFoods = useMemo(() => {
-    // ... (lógica de filtrado igual)
     const combinedFoods = [...foodsData, ...customFoods];
     let filtered = combinedFoods;
     
@@ -107,7 +128,6 @@ export default function Dashboard() {
   }, [activeProfile]);
 
   const { motivationalPhrase, remainingText } = useMemo(() => {
-    // ... (lógica de frases igual)
     if (!activeProfile) {
       return { 
         motivationalPhrase: "Inicia sesión para empezar.",
@@ -171,26 +191,42 @@ export default function Dashboard() {
     );
   };
 
-  const handleAddFood = (food: FoodItem) => {
-    // ... (lógica de añadir comida igual)
+  const handleAddFood = (food: FoodItem, unitsToAdd: number) => {
+    if (unitsToAdd <= 0) return;
+
     const existingEntry = intakeEntries.find(entry => entry.foodId === food.id);
     if (existingEntry) {
-      handleUpdateUnits(existingEntry.id, existingEntry.units + 1);
+      handleUpdateUnits(existingEntry.id, existingEntry.units + unitsToAdd);
     } else {
       const newEntry: IntakeEntry = {
         id: `entry-${Date.now()}`,
         dateISO: today,
         foodId: food.id,
         kcalPerUnit: food.kcalPerServing,
-        units: 1,
+        units: unitsToAdd,
         timestamp: Date.now(),
       };
-      setIntakeEntries([...intakeEntries, newEntry]);
+      setIntakeEntries(prevEntries => [newEntry, ...prevEntries]);
     }
   };
 
+  const handleOpenQuantityDialog = (food: FoodItem) => {
+    setSelectedFood(food);
+    setQuantity('1');
+    setIsQuantityDialogOpen(true);
+  };
+
+  const handleSubmitQuantity = () => {
+    if (!selectedFood) return;
+    const units = Number(quantity);
+    if (units > 0) {
+      handleAddFood(selectedFood, units);
+    }
+    setIsQuantityDialogOpen(false);
+    setSelectedFood(null);
+  };
+
   const handleAddManual = (e: React.FormEvent) => {
-    // ... (lógica de añadir manual igual)
     e.preventDefault();
     if (!manualName.trim() || !manualKcal) return;
 
@@ -208,19 +244,7 @@ export default function Dashboard() {
         isCustom: true,
       };
       setCustomFoods(prev => [...prev, newFoodItem]);
-      if (units > 1) {
-        const newEntry: IntakeEntry = {
-          id: `entry-${Date.now()}`,
-          dateISO: today,
-          foodId: newFoodItem.id,
-          kcalPerUnit: newFoodItem.kcalPerServing,
-          units: units,
-          timestamp: Date.now(),
-        };
-        setIntakeEntries([...intakeEntries, newEntry]);
-      } else {
-        handleAddFood(newFoodItem);
-      }
+      handleAddFood(newFoodItem, units);
     } else {
       const newEntry: IntakeEntry = {
         id: `entry-${Date.now()}`,
@@ -230,14 +254,14 @@ export default function Dashboard() {
         units: units,
         timestamp: Date.now(),
       };
-      setIntakeEntries([...intakeEntries, newEntry]);
+      setIntakeEntries(prevEntries => [newEntry, ...prevEntries]);
     }
     
     setManualName('');
     setManualKcal('');
     setManualUnits('1');
     setSaveToMyFoods(false);
-    setShowAddManual(false);
+    setShowAddManual(false); 
   };
 
   const handleDeleteEntry = (id: string) => {
@@ -245,12 +269,10 @@ export default function Dashboard() {
   };
 
   const handleReset = () => {
-    // --- CAMBIO: La confirmación se movió al JSX (AlertDialog) ---
     setIntakeEntries([]);
   };
 
   const handleLogout = () => {
-    // Podríamos cambiar esto a un AlertDialog también, pero por ahora lo dejamos
     if (confirm('¿Deseas cambiar de perfil?')) {
       logout();
       navigate('/login');
@@ -260,7 +282,6 @@ export default function Dashboard() {
   const handleGoalChange = (newGoal: Goal) => {
     if (!activeProfile) return;
     if (activeProfile.tdee === 0) {
-      // --- CAMBIO: De alert() a toast() ---
       toast({
         title: "Meta no calculada",
         description: "Primero necesitas calcular tus datos en la página de registro.",
@@ -273,7 +294,6 @@ export default function Dashboard() {
   };
 
   const handleExport = async () => {
-    // ... (lógica de exportar igual)
     if (!activeProfile) return;
     try {
       await exportToPDF({
@@ -293,12 +313,14 @@ export default function Dashboard() {
     }
   };
 
+  // --- FUNCIÓN ELIMINADA (COPIAR DÍA) ---
+  // const handleCopyDay = ...
+
   if (!activeProfile) return null;
 
   return (
     <div className={styles.page}>
       <header className={styles.header}>
-        {/* ... (header JSX igual) ... */}
         <div className={styles.headerContent}>
           <div>
             <h1 className={styles.title}>Bienvenido, {activeProfile.name}</h1>
@@ -338,7 +360,6 @@ export default function Dashboard() {
                     <DialogTitle>Añadir alimento manual</DialogTitle>
                   </DialogHeader>
                   <form onSubmit={handleAddManual} className={styles.manualForm}>
-                    {/* ... (formulario añadir manual JSX igual) ... */}
                     <div className={styles.manualFormGrid}>
                       <input
                         type="text"
@@ -398,7 +419,11 @@ export default function Dashboard() {
                 <p className={styles.emptyState}>No se encontraron alimentos</p>
               ) : (
                 filteredFoods.map(food => (
-                  <FoodCard key={food.id} food={food} onAdd={handleAddFood} />
+                  <FoodCard 
+                    key={food.id} 
+                    food={food} 
+                    onAdd={handleOpenQuantityDialog} 
+                  />
                 ))
               )}
             </div>
@@ -409,7 +434,6 @@ export default function Dashboard() {
           <div className={styles.sidebarContent}>
             
             <section className={styles.goalSection}>
-              {/* ... (sección de metas JSX igual) ... */}
               <h3 className={styles.goalTitle}>🎯 Tu Objetivo</h3>
               <div className={styles.goalOptions}>
                 <button
@@ -440,7 +464,6 @@ export default function Dashboard() {
             </section>
             
             <section className={styles.progressSection}>
-              {/* ... (sección de progreso JSX igual) ... */}
               <ProgressRing 
                 consumed={totalConsumed} 
                 goal={targetKcal} 
@@ -457,11 +480,13 @@ export default function Dashboard() {
               <div className={styles.sectionHeader}>
                 <h2>Consumo de hoy</h2>
                 <div className={styles.intakeHeaderActions}>
+                  
+                  {/* --- BOTÓN ELIMINADO (COPIAR DÍA) --- */}
+
                   <button onClick={handleExport} className={styles.iconButton} aria-label="Exportar PDF">
                     <Download size={18} />
                   </button>
                   {intakeEntries.length > 0 && (
-                    // --- CAMBIO: AlertDialog para reiniciar día ---
                     <AlertDialog>
                       <AlertDialogTrigger asChild>
                         <button className={`${styles.iconButton} ${styles.iconButtonDanger}`} aria-label="Reiniciar día">
@@ -514,6 +539,68 @@ export default function Dashboard() {
           </div>
         </aside>
       </div>
+
+      {/* --- MODAL (IDEA 1) --- */}
+      <Dialog open={isQuantityDialogOpen} onOpenChange={setIsQuantityDialogOpen}>
+        <DialogContent className={styles.quantityDialog}>
+          <DialogHeader>
+            <DialogTitle>Añadir {selectedFood?.name}</DialogTitle>
+            <DialogDescription>
+              {selectedFood?.servingName} ({selectedFood?.kcalPerServing} kcal c/u)
+            </DialogDescription>
+          </DialogHeader>
+          <div className={styles.quantityForm}>
+            <label htmlFor="quantity" className={styles.label}>
+              Cantidad
+            </label>
+            <Input
+              id="quantity"
+              type="number"
+              value={quantity}
+              onChange={(e) => setQuantity(e.target.value)}
+              min="1"
+              className={styles.input}
+              autoFocus
+              onKeyDown={(e) => {
+                if (e.key === 'Enter') {
+                  handleSubmitQuantity();
+                  e.preventDefault();
+                }
+              }}
+            />
+          </div>
+          <DialogFooter>
+            <Button variant="outline" onClick={() => setIsQuantityDialogOpen(false)}>Cancelar</Button>
+            <Button onClick={handleSubmitQuantity}>Agregar {quantity}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+      
+      {/* --- MODAL (IDEA 3) --- */}
+      <Dialog open={isTdeeModalOpen}>
+        <DialogContent 
+          className={styles.quantityDialog}
+          onInteractOutside={(e) => e.preventDefault()}
+        >
+          <DialogHeader>
+            <DialogTitle>¡Bienvenido, {activeProfile?.name}!</DialogTitle>
+            <DialogDescription>
+              Para empezar a registrar tus calorías, primero necesitamos calcular tu meta.
+              Por favor, completa tus datos físicos.
+            </DialogDescription>
+          </DialogHeader>
+          <DialogFooter>
+            <Button 
+              className={styles.buttonPrimary} 
+              onClick={() => navigate('/registro')}
+            >
+              Ir a Mis Datos
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
     </div>
   );
 }
