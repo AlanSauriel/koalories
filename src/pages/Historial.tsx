@@ -2,7 +2,7 @@ import { useEffect, useState, useMemo } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { useSession } from '../context/SessionContext';
 import { ThemeToggle } from '../components/ThemeToggle';
-import { ArrowLeft, TrendingUp, TrendingDown, Target, Plus } from 'lucide-react'; // Se quitó Copy
+import { ArrowLeft, TrendingUp, TrendingDown, Target, Plus } from 'lucide-react';
 import { BarChart, Bar, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer, ReferenceLine, Line, ComposedChart, Area } from 'recharts';
 import { getDaysAgo, formatDateShort, dateToISOString } from '../utils/date';
 import { IntakeEntry, FoodItem } from '../types';
@@ -27,9 +27,9 @@ import {
 import { SearchBar } from '../components/SearchBar';
 import { CategoryFilter } from '../components/CategoryFilter';
 import { FoodCard } from '../components/FoodCard';
-// Se quitaron Popover y useToast
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
+import { AnimatePresence } from 'framer-motion'; // --- IMPORTADO (IDEA 1) ---
 
 
 interface HistoryPoint {
@@ -45,7 +45,6 @@ const endOfToday = new Date(new Date().setHours(23, 59, 59, 999));
 export default function Historial() {
   const navigate = useNavigate();
   const { activeProfile } = useSession();
-  // Se quitó useToast
 
   const [viewMode, setViewMode] = useState<'summary' | 'calendar'>('summary');
   const [selectedDate, setSelectedDate] = useState<Date | undefined>(new Date());
@@ -74,9 +73,6 @@ export default function Historial() {
   const [selectedFood, setSelectedFood] = useState<FoodItem | null>(null);
   const [quantity, setQuantity] = useState('1');
   
-  // --- ESTADO ELIMINADO (COPIAR DÍA) ---
-  // const [isCopyDayOpen, setIsCopyDayOpen] = useState(false);
-
   useEffect(() => {
     if (!activeProfile) {
       navigate('/login');
@@ -269,9 +265,6 @@ export default function Historial() {
     setShowAddManual(false); 
   };
 
-  // --- FUNCIÓN ELIMINADA (COPIAR DÍA) ---
-  // const handleHistoryCopyDay = ...
-
   if (!activeProfile) return null;
 
   const hasSummaryData = summaryData.some(d => d.kcal > 0);
@@ -286,6 +279,7 @@ export default function Historial() {
   return (
     <div className={styles.page}>
       <header className={styles.header}>
+        {/* ... (el JSX del header es igual) ... */}
         <div className={styles.headerContent}>
           <Link to="/dashboard" className={styles.backButton}>
             <ArrowLeft size={20} />
@@ -313,6 +307,7 @@ export default function Historial() {
           
           <TabsContent value="summary">
             {!hasSummaryData ? (
+              // ... (el JSX de 'emptyState' es igual) ...
               <div className={styles.emptyState}>
                 <p>Aún no tienes datos registrados en los últimos 7 días.</p>
                 <Link to="/dashboard" className={styles.buttonPrimary}>
@@ -322,6 +317,7 @@ export default function Historial() {
             ) : (
               <>
                 <div className={styles.statsGrid}>
+                  {/* ... (el JSX de 'statsGrid' es igual) ... */}
                   <div className={styles.statCard}>
                     <div className={styles.statIcon}>
                       <Target size={24} />
@@ -361,6 +357,7 @@ export default function Historial() {
                 </div>
 
                 <div className={styles.chartContainer}>
+                  {/* ... (el JSX de 'chartContainer' es igual) ... */}
                   <h2 className={styles.chartTitle}>Consumo vs Meta (Últimos 7 días)</h2>
                   <ResponsiveContainer width="100%" height={400}>
                     <ComposedChart data={summaryData}>
@@ -439,6 +436,7 @@ export default function Historial() {
           <TabsContent value="calendar">
             <div className={styles.calendarViewContainer}>
               <div className={styles.calendarWrapper}>
+                {/* ... (el JSX del 'Calendar' es igual) ... */}
                 <Calendar
                   mode="single"
                   selected={selectedDate}
@@ -459,8 +457,6 @@ export default function Historial() {
                   
                   {!isFutureDate && (
                     <div className={styles.calendarActions}>
-                      {/* --- BOTÓN ELIMINADO (COPIAR DÍA) --- */}
-
                       <button 
                         onClick={() => setIsCatalogOpen(true)}
                         className={styles.addDayButton}
@@ -476,20 +472,23 @@ export default function Historial() {
                   <p className={styles.emptyDay}>No hay registros para este día.</p>
                 ) : (
                   <div className={styles.selectedDayList}>
-                    {selectedDayEntries.map(entry => {
-                      const food = entry.foodId 
-                        ? combinedFoods.find(f => f.id === entry.foodId) 
-                        : undefined;
-                      return (
-                        <IntakeItem
-                          key={entry.id}
-                          entry={entry}
-                          food={food}
-                          onUpdateUnits={!isFutureDate ? handleUpdateUnits : undefined}
-                          onDelete={!isFutureDate ? handleDeleteEntry : undefined}
-                        />
-                      );
-                    })}
+                    {/* --- CAMBIO (IDEA 1): ANIMACIÓN DE LISTA --- */}
+                    <AnimatePresence>
+                      {selectedDayEntries.map(entry => {
+                        const food = entry.foodId 
+                          ? combinedFoods.find(f => f.id === entry.foodId) 
+                          : undefined;
+                        return (
+                          <IntakeItem
+                            key={entry.id}
+                            entry={entry}
+                            food={food}
+                            onUpdateUnits={!isFutureDate ? handleUpdateUnits : undefined}
+                            onDelete={!isFutureDate ? handleDeleteEntry : undefined}
+                          />
+                        );
+                      })}
+                    </AnimatePresence>
                   </div>
                 )}
                 
@@ -505,11 +504,11 @@ export default function Historial() {
 
         {/* --- MODAL DEL CATÁLOGO --- */}
         <Dialog open={isCatalogOpen} onOpenChange={setIsCatalogOpen}>
+          {/* ... (el JSX del 'Catalog Dialog' es igual) ... */}
           <DialogContent className={styles.catalogDialog}>
             <DialogHeader>
               <DialogTitle>Añadir a {selectedDate ? formatDateShort(dateToISOString(selectedDate)) : '...'}</DialogTitle>
             </DialogHeader>
-            
             <div className={styles.catalogContent}>
               <div className={styles.catalogHeader}>
                 <Dialog open={showAddManual} onOpenChange={setShowAddManual}>
@@ -538,12 +537,10 @@ export default function Historial() {
                   </DialogContent>
                 </Dialog>
               </div>
-              
               <div className={styles.filters}>
                 <SearchBar value={searchQuery} onChange={setSearchQuery} />
                 <CategoryFilter selected={selectedCategory} onChange={setSelectedCategory} />
               </div>
-
               <div className={styles.foodGrid}>
                 {filteredFoods.length === 0 ? (
                   <p className={styles.emptyState}>No se encontraron alimentos</p>
@@ -563,6 +560,7 @@ export default function Historial() {
         
         {/* --- MODAL (IDEA 1) --- */}
         <Dialog open={isQuantityDialogOpen} onOpenChange={setIsQuantityDialogOpen}>
+          {/* ... (el JSX del Dialog 'Cantidad' es igual) ... */}
           <DialogContent className={styles.quantityDialog}>
             <DialogHeader>
               <DialogTitle>Añadir {selectedFood?.name}</DialogTitle>
