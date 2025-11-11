@@ -59,6 +59,7 @@
   background: var(--brand);
   border-color: var(--brand);
   color: white;
+  transform: scale(1.1);
 }
 
 .iconButtonDanger {
@@ -70,6 +71,7 @@
   background: var(--danger);
   border-color: var(--danger);
   color: white;
+  transform: scale(1.1);
 }
 
 .dashboardLayout {
@@ -95,7 +97,22 @@
 .sidebarContent {
   display: flex;
   flex-direction: column;
-  gap: var(--spacing-2xl);
+  gap: var(--spacing-lg);
+  background: var(--bg-card);
+  border: 1px solid var(--border-color);
+  border-radius: var(--radius-lg);
+  padding: var(--spacing-lg);
+  box-shadow: var(--shadow);
+  position: sticky; 
+  top: 110px;
+  
+  /* --- CAMBIO: Quitamos el scroll de aquí --- */
+  /* max-height: calc(100vh - 110px - var(--spacing-xl)); --- ELIMINADO --- */
+  /* overflow-y: auto; --- ELIMINADO --- */
+}
+
+.sidebarSeparator {
+  margin: 0;
 }
 
 .progressSection {
@@ -103,10 +120,6 @@
   flex-direction: column;
   align-items: center;
   gap: var(--spacing-lg);
-  background: var(--bg-card);
-  padding: var(--spacing-xl);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
 }
 
 .progressText {
@@ -174,7 +187,7 @@
 
 .buttonPrimary {
   background: var(--gradient-brand);
-  color: white; /* Color por defecto (modo oscuro) */
+  color: white;
 }
 
 .buttonSecondary {
@@ -232,13 +245,19 @@
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
+  padding-right: var(--spacing-xs);
+  
+  /* --- CAMBIO: Devolvemos el scroll a la lista --- */
+  /* Ajusta este valor si tu sidebar sigue cortándose */
+  max-height: 500px; 
+  overflow-y: auto;
 }
 
 .emptyState {
   text-align: center;
   color: var(--text-secondary);
   padding: var(--spacing-2xl);
-  background: var(--bg-card);
+  background: var(--bg-secondary);
   border-radius: var(--radius-lg);
   border: 2px dashed var(--border-color);
 }
@@ -256,14 +275,9 @@
 }
 
 .goalSection {
-  background: var(--bg-card);
-  padding: var(--spacing-lg);
-  border-radius: var(--radius-lg);
-  border: 1px solid var(--border-color);
   display: flex;
   flex-direction: column;
   gap: var(--spacing-md);
-  box-shadow: var(--shadow);
 }
 
 .goalTitle {
@@ -347,11 +361,9 @@
   cursor: pointer;
 }
 
-/* --- 🚀 FIX AÑADIDO AQUÍ --- */
-/* Arreglo para .buttonPrimary en modo claro */
 :global([data-theme="light"]) .buttonPrimary {
-  color: var(--text-primary); /* Texto oscuro */
-  background: var(--bg-secondary); /* Fondo gris claro */
+  color: var(--text-primary);
+  background: var(--bg-secondary);
   border: 1px solid var(--border-color);
   box-shadow: var(--shadow);
 }
@@ -361,11 +373,9 @@
   border-color: var(--brand);
 }
 
-/* Arregla el color del icono (si hay uno) */
 :global([data-theme="light"]) .buttonPrimary svg {
   stroke: var(--text-primary);
 }
-/* --- FIN DEL FIX --- */
 
 
 @media (max-width: 768px) {
@@ -409,6 +419,18 @@
   .goalOptions {
     grid-template-columns: 1fr;
   }
+
+  .sidebarContent {
+    position: static;
+    max-height: none;
+    overflow-y: visible;
+  }
+
+  /* En móvil, la lista de intake no tendrá max-height */
+  .intakeList {
+    max-height: none;
+    overflow-y: visible;
+  }
 }
 
 @media (min-width: 992px) {
@@ -417,9 +439,7 @@
     align-items: flex-start;
   }
 }
-/* --- ESTILOS AÑADIDOS PARA IDEAS 1 Y 3 --- */
 
-/* Estilos para el modal de Cantidad (Idea 1) y TDEE (Idea 3) */
 .quantityDialog {
   max-width: 450px;
 }
